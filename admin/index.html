@@ -1,755 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Freelancer Services</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* Asosiy stillar */
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #f59e0b;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --gray: #9ca3af;
-            --success: #10b981;
-            --error: #ef4444;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --transition: all 0.3s ease;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Freelancer Services</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <!-- Login tekshiruv -->
+  <script>
+    if (localStorage.getItem("loggedIn") !== "true") {
+      window.location.href = "login.html";
+    }
+  </script>
 
-        body {
-            background-color: #f5f7fa;
-            color: var(--dark);
-            line-height: 1.6;
-        }
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #f59e0b;
+      --dark: #1f2937;
+      --light: #f9fafb;
+      --gray: #9ca3af;
+      --success: #10b981;
+      --error: #ef4444;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --transition: all 0.3s ease;
+    }
 
-        .admin-container {
-            min-height: 100vh;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        /* Login qismi */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-        }
+    body {
+      background-color: #f5f7fa;
+      color: var(--dark);
+      line-height: 1.6;
+    }
 
-        .login-form {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            width: 90%;
-            max-width: 400px;
-        }
+    .admin-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .login-form h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--primary);
-        }
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow);
+    }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
+    header h1 {
+      font-size: 1.5rem;
+    }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
+    main {
+      flex: 1;
+      padding: 2rem;
+    }
 
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 5px;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 28px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            box-shadow: var(--shadow);
-            width: 100%;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        /* Dashboard */
-        .dashboard {
-            display: none;
-            min-height: 100vh;
-        }
-
-        .admin-header {
-            background: white;
-            padding: 1rem 2rem;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .admin-content {
-            padding: 2rem;
-        }
-
-        /* Statistics */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1.5rem;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .stat-info h3 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-        }
-
-        /* Tables */
-        .orders-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            margin-bottom: 2rem;
-        }
-
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        .orders-table th,
-        .orders-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .orders-table th {
-            background-color: #f9fafb;
-            font-weight: 600;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-pending {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-in-progress {
-            background-color: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-completed {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .action-btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: var(--transition);
-            margin-right: 0.5rem;
-        }
-
-        .btn-view {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal {
-            background-color: white;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 600px;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .order-details {
-            margin: 1.5rem 0;
-        }
-
-        .detail-item {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 5px;
-            color: white;
-            z-index: 3000;
-            display: none;
-        }
-
-        .notification.success {
-            background-color: var(--success);
-        }
-
-        .notification.error {
-            background-color: var(--error);
-        }
-    </style>
+    footer {
+      background: var(--dark);
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
 </head>
 <body>
-    <div class="admin-container">
-        <!-- Login Form -->
-        <div class="login-container" id="login-container">
-            <div class="login-form">
-                <h2>Admin Login</h2>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" required>
-                    </div>
-                    <button type="submit" class="btn">Login</button>
-                </form>
-            </div>
-        </div>
+  <div class="admin-container">
+    <header>
+      <h1>Admin Panel</h1>
+      <button onclick="logout()" style="background:#ef4444; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">
+        Chiqish
+      </button>
+    </header>
 
-        <!-- Admin Dashboard -->
-        <div class="dashboard" id="dashboard">
-            <header class="admin-header">
-                <h1>Admin Dashboard</h1>
-                <button class="btn btn-logout" id="logout-btn">Logout</button>
-            </header>
+    <main>
+      <div class="card">
+        <h2>Buyurtmalar ro‘yxati</h2>
+        <div id="orders"></div>
+      </div>
 
-            <div class="admin-content">
-                <!-- Statistics Section -->
-                <section class="stats-section">
-                    <h2>Statistics</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="total-orders">0</h3>
-                                <p>Total Orders</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-calendar-day"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="today-orders">0</h3>
-                                <p>Today's Orders</p>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="completed-orders">0</h3>
-                                <p>Completed Orders</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+      <div class="card">
+        <h2>Xizmatlarga talab</h2>
+        <div id="serviceDemand"></div>
+      </div>
+    </main>
 
-                <!-- Orders Section -->
-                <section class="orders-section">
-                    <h2>Active Orders</h2>
-                    <div class="orders-table-container">
-                        <table class="orders-table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer Name</th>
-                                    <th>Service</th>
-                                    <th>Order Time</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="orders-table-body">
-                                <!-- Orders will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+    <footer>
+      <p>&copy; 2025 Freelancer Services Admin</p>
+    </footer>
+  </div>
 
-                <!-- Completed Orders Section -->
-                <section class="orders-section">
-                    <h2>Completed Orders</h2>
-                    <div class="orders-table-container">
-                        <table class="orders-table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer Name</th>
-                                    <th>Service</th>
-                                    <th>Order Time</th>
-                                    <th>Completed Time</th>
-                                </tr>
-                            </thead>
-                            <tbody id="completed-orders-table-body">
-                                <!-- Completed orders will be populated here -->
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-        </div>
+  <script>
+    function logout() {
+      localStorage.removeItem("loggedIn");
+      window.location.href = "login.html";
+    }
 
-        <!-- Order Detail Modal -->
-        <div class="modal-overlay" id="order-detail-modal">
-            <div class="modal">
-                <button class="close-modal" id="close-detail-modal">&times;</button>
-                <h2>Order Details</h2>
-                <div class="order-details" id="order-details">
-                    <!-- Order details will be populated here -->
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-start" id="start-order-btn">Start Order</button>
-                    <button class="btn btn-complete" id="complete-order-btn">Complete Order</button>
-                </div>
-            </div>
-        </div>
+    // Buyurtmalarni backenddan olish uchun misol (keyin to'ldirasiz)
+    async function loadOrders() {
+      try {
+        const res = await fetch("../data/orders.json");
+        const orders = await res.json();
+        document.getElementById("orders").innerHTML =
+          "<pre>" + JSON.stringify(orders, null, 2) + "</pre>";
+      } catch (err) {
+        console.error("Xatolik:", err);
+      }
+    }
 
-        <!-- Notification -->
-        <div class="notification" id="notification"></div>
-    </div>
+    async function loadDemand() {
+      try {
+        const res = await fetch("../data/serviceDemand.json");
+        const demand = await res.json();
+        document.getElementById("serviceDemand").innerHTML =
+          "<pre>" + JSON.stringify(demand, null, 2) + "</pre>";
+      } catch (err) {
+        console.error("Xatolik:", err);
+      }
+    }
 
-    <script>
-        // Admin credentials
-        const ADMIN_CREDENTIALS = {
-            username: 'truslon',
-            password: 'ruslonbek11'
-        };
-
-        // Demo orders data
-        let orders = [];
-        let currentOrder = null;
-
-        // DOM Elements
-        const loginContainer = document.getElementById('login-container');
-        const dashboard = document.getElementById('dashboard');
-        const loginForm = document.getElementById('login-form');
-        const logoutBtn = document.getElementById('logout-btn');
-        const ordersTableBody = document.getElementById('orders-table-body');
-        const completedOrdersTableBody = document.getElementById('completed-orders-table-body');
-        const orderDetailModal = document.getElementById('order-detail-modal');
-        const closeDetailModal = document.getElementById('close-detail-modal');
-        const orderDetails = document.getElementById('order-details');
-        const startOrderBtn = document.getElementById('start-order-btn');
-        const completeOrderBtn = document.getElementById('complete-order-btn');
-        const notification = document.getElementById('notification');
-
-        // Check if user is already logged in
-        function checkLoginStatus() {
-            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
-            if (isLoggedIn) {
-                showDashboard();
-            }
-        }
-
-        // Login function
-        function handleLogin(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                localStorage.setItem('adminLoggedIn', 'true');
-                showDashboard();
-                showNotification('Login successful!', 'success');
-            } else {
-                showNotification('Invalid username or password', 'error');
-            }
-        }
-
-        // Logout function
-        function handleLogout() {
-            localStorage.removeItem('adminLoggedIn');
-            loginContainer.style.display = 'flex';
-            dashboard.style.display = 'none';
-            loginForm.reset();
-            showNotification('Logged out successfully', 'success');
-        }
-
-        // Show dashboard
-        function showDashboard() {
-            loginContainer.style.display = 'none';
-            dashboard.style.display = 'block';
-            loadOrders();
-        }
-
-        // Load orders from localStorage
-        function loadOrders() {
-            // Try to get orders from localStorage
-            const savedOrders = localStorage.getItem('orders');
-            if (savedOrders) {
-                orders = JSON.parse(savedOrders);
-            } else {
-                // Load demo data if no orders in localStorage
-                loadDemoData();
-            }
-            
-            renderOrdersTable();
-            updateStatistics();
-        }
-
-        // Load demo data
-        function loadDemoData() {
-            orders = [
-                {
-                    id: 1,
-                    name: "John Doe",
-                    whatsapp: "+1234567890",
-                    email: "john@example.com",
-                    service: "Web Design",
-                    details: "I need a responsive website for my business",
-                    orderTime: new Date().toISOString(),
-                    status: "pending"
-                },
-                {
-                    id: 2,
-                    name: "Jane Smith",
-                    whatsapp: "+0987654321",
-                    email: "jane@example.com",
-                    service: "Logo Design",
-                    details: "Need a modern logo for my startup",
-                    orderTime: new Date(Date.now() - 86400000).toISOString(),
-                    status: "completed",
-                    startTime: new Date(Date.now() - 86400000).toISOString(),
-                    endTime: new Date(Date.now() - 82800000).toISOString()
-                }
-            ];
-        }
-
-        // Update statistics
-        function updateStatistics() {
-            const today = new Date().toDateString();
-            const todayOrders = orders.filter(order => {
-                const orderDate = new Date(order.orderTime).toDateString();
-                return orderDate === today;
-            });
-            
-            const completedOrders = orders.filter(order => order.status === 'completed');
-            const completionRate = orders.length > 0 
-                ? Math.round((completedOrders.length / orders.length) * 100) 
-                : 0;
-            
-            document.getElementById('total-orders').textContent = orders.length;
-            document.getElementById('today-orders').textContent = todayOrders.length;
-            document.getElementById('completed-orders').textContent = completedOrders.length;
-        }
-
-        // Render orders table
-        function renderOrdersTable() {
-            ordersTableBody.innerHTML = '';
-            completedOrdersTableBody.innerHTML = '';
-            
-            const activeOrders = orders.filter(order => order.status !== 'completed');
-            const completedOrders = orders.filter(order => order.status === 'completed');
-            
-            // Render active orders
-            if (activeOrders.length === 0) {
-                ordersTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No active orders</td></tr>';
-            } else {
-                activeOrders.forEach(order => {
-                    const tr = document.createElement('tr');
-                    const orderTime = new Date(order.orderTime);
-                    
-                    tr.innerHTML = `
-                        <td>#${order.id}</td>
-                        <td>${order.name}</td>
-                        <td>${order.service}</td>
-                        <td>${orderTime.toLocaleString()}</td>
-                        <td><span class="status-badge status-${order.status}">${order.status}</span></td>
-                        <td>
-                            <button class="action-btn btn-view" data-id="${order.id}">View</button>
-                        </td>
-                    `;
-                    
-                    ordersTableBody.appendChild(tr);
-                });
-            }
-            
-            // Render completed orders
-            if (completedOrders.length === 0) {
-                completedOrdersTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No completed orders</td></tr>';
-            } else {
-                completedOrders.forEach(order => {
-                    const tr = document.createElement('tr');
-                    const orderTime = new Date(order.orderTime);
-                    const completedTime = new Date(order.endTime);
-                    
-                    tr.innerHTML = `
-                        <td>#${order.id}</td>
-                        <td>${order.name}</td>
-                        <td>${order.service}</td>
-                        <td>${orderTime.toLocaleString()}</td>
-                        <td>${completedTime.toLocaleString()}</td>
-                    `;
-                    
-                    completedOrdersTableBody.appendChild(tr);
-                });
-    
-     // Add event listeners to view buttons
-            document.querySelectorAll('.btn-view').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const orderId = btn.getAttribute('data-id');
-                    viewOrderDetails(orderId);
-                });
-            });
-        }
-
-        // View order details
-        function viewOrderDetails(orderId) {
-            currentOrder = orders.find(order => order.id == orderId);
-            
-            if (!currentOrder) return;
-            
-            const orderTime = new Date(currentOrder.orderTime);
-            
-            orderDetails.innerHTML = `
-                <div class="detail-item">
-                    <h4>Order ID</h4>
-                    <p>#${currentOrder.id}</p>
-                </div>
-                <div class="detail-item">
-                    <h4>Customer Name</h4>
-                    <p>${currentOrder.name}</p>
-                </div>
-                <div class="detail-item">
-                    <h4>WhatsApp Number</h4>
-                    <p>${currentOrder.whatsapp}</p>
-                </div>
-                <div class="detail-item">
-                    <h4>Email Address</h4>
-                    <p>${currentOrder.email}</p>
-                </div>
-                <div class="detail-item">
-                    <h4>Service</h4>
-                    <p>${currentOrder.service}</p>
-                </div>
-                <div class="detail-item">
-                    <h4>Order Time</h4>
-                    <p>${orderTime.toLocaleString()}</p>
-                </div>
-                <div class="detail-item">
-                    <h4>Project Details</h4>
-                    <p>${currentOrder.details}</p>
-                </div>
-                <div class="detail-item">
-                    <h4>Status</h4>
-                    <p><span class="status-badge status-${currentOrder.status}">${currentOrder.status}</span></p>
-                </div>
-            `;
-            
-            // Show/hide buttons based on status
-            if (currentOrder.status === 'pending') {
-                startOrderBtn.style.display = 'block';
-                completeOrderBtn.style.display = 'none';
-            } else if (currentOrder.status === 'in-progress') {
-                startOrderBtn.style.display = 'none';
-                completeOrderBtn.style.display = 'block';
-            } else {
-                startOrderBtn.style.display = 'none';
-                completeOrderBtn.style.display = 'none';
-            }
-            
-            orderDetailModal.style.display = 'flex';
-        }
-
-        // Start order
-        function startOrder() {
-            if (!currentOrder) return;
-            
-            currentOrder.status = 'in-progress';
-            currentOrder.startTime = new Date().toISOString();
-            
-            // Update in orders array
-            const index = orders.findIndex(order => order.id === currentOrder.id);
-            if (index !== -1) {
-                orders[index] = currentOrder;
-                localStorage.setItem('orders', JSON.stringify(orders));
-            }
-            
-            // Update UI
-            orderDetailModal.style.display = 'none';
-            renderOrdersTable();
-            updateStatistics();
-            
-            showNotification('Order started successfully', 'success');
-        }
-
-        // Complete order
-        function completeOrder() {
-            if (!currentOrder) return;
-            
-            currentOrder.status = 'completed';
-            currentOrder.endTime = new Date().toISOString();
-            
-            // Update in orders array
-            const index = orders.findIndex(order => order.id === currentOrder.id);
-            if (index !== -1) {
-                orders[index] = currentOrder;
-                localStorage.setItem('orders', JSON.stringify(orders));
-            }
-            
-            // Update UI
-            orderDetailModal.style.display = 'none';
-            renderOrdersTable();
-            updateStatistics();
-            
-            showNotification('Order completed successfully', 'success');
-        }
-
-        // Show notification
-        function showNotification(message, type) {
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        // Close modal
-        function closeModal() {
-            orderDetailModal.style.display = 'none';
-        }
-
-        // Event Listeners
-        loginForm.addEventListener('submit', handleLogin);
-        logoutBtn.addEventListener('click', handleLogout);
-        closeDetailModal.addEventListener('click', closeModal);
-        startOrderBtn.addEventListener('click', startOrder);
-        completeOrderBtn.addEventListener('click', completeOrder);
-
-        // Close modal when clicking outside
-        orderDetailModal.addEventListener('click', (e) => {
-            if (e.target === orderDetailModal) {
-                closeModal();
-            }
-        });
-
-        // Initialize
-        checkLoginStatus();
-
-        // Simulate new orders every 30 seconds for demo
-        setInterval(() => {
-            // Check if there are new orders in localStorage
-            const savedOrders = localStorage.getItem('orders');
-            if (savedOrders) {
-                const newOrders = JSON.parse(savedOrders);
-                if (newOrders.length !== orders.length) {
-                    orders = newOrders;
-                    renderOrdersTable();
-                    updateStatistics();
-                    showNotification('New orders received!', 'success');
-                }
-            }
-        }, 30000);
-    </script>
+    loadOrders();
+    loadDemand();
+  </script>
 </body>
 </html>
-```
-
