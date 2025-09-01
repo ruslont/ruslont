@@ -292,30 +292,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
-    console.log(`🌐 Frontend: http://localhost:${PORT}`);
-    console.log(`⚙️  Admin panel: http://localhost:${PORT}/admin`);
-    console.log(`🔗 API Health: http://localhost:${PORT}/api/health`);
-    console.log(`📁 Current directory: ${__dirname}`);
-    
-    // Check if files exist
-    const frontendExists = fs.existsSync(path.join(__dirname, '../frontend', 'index.html'));
-    const adminExists = fs.existsSync(path.join(__dirname, '../admin', 'index.html'));
-    
-    console.log(`📄 Frontend index.html exists: ${frontendExists}`);
-    console.log(`📄 Admin index.html exists: ${adminExists}`);
-    
-    if (!frontendExists) {
-        console.log('❌ WARNING: Frontend files not found!');
-    }
-    if (!adminExists) {
-        console.log('❌ WARNING: Admin files not found!');
-    }
-});
 
-module.exports = app;
 
 // server.js faylining oxiriga quyidagilarni qo'shing:
 
@@ -397,3 +374,27 @@ app.get('/api/admin/statistics', (req, res) => {
         res.status(500).json({ error: 'Failed to get statistics' });
     }
 });
+// Start server
+app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+    console.log(`🌐 Frontend: http://localhost:${PORT}`);
+    console.log(`⚙️  Admin panel: http://localhost:${PORT}/admin`);
+    console.log(`🔗 API Health: http://localhost:${PORT}/api/health`);
+    console.log(`📁 Current directory: ${__dirname}`);
+    
+    // Check if files exist
+    const frontendExists = fs.existsSync(path.join(__dirname, '../frontend', 'index.html'));
+    const adminExists = fs.existsSync(path.join(__dirname, '../admin', 'index.html'));
+    
+    console.log(`📄 Frontend index.html exists: ${frontendExists}`);
+    console.log(`📄 Admin index.html exists: ${adminExists}`);
+    
+    if (!frontendExists) {
+        console.log('❌ WARNING: Frontend files not found!');
+    }
+    if (!adminExists) {
+        console.log('❌ WARNING: Admin files not found!');
+    }
+});
+
+module.exports = app;
