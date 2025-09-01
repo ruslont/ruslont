@@ -317,7 +317,6 @@ app.listen(PORT, () => {
 
 module.exports = app;
 
-.
 // server.js faylining oxiriga quyidagilarni qo'shing:
 
 // Admin Login API
