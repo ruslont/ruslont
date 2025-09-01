@@ -626,3 +626,48 @@ function initializeLazyLoading() {
 // Initialize lazy loading
 initializeLazyLoading();
 ```
+// Buyurtma yuborilganda localStoragega saqlash
+function handleOrderSubmit(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const name = document.getElementById('name').value;
+    const whatsapp = document.getElementById('whatsapp').value;
+    const email = document.getElementById('email').value;
+    const details = document.getElementById('details').value;
+    const service = serviceInput.value;
+    
+    // Get existing orders from localStorage
+    const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
+    
+    // Create new order
+    const newOrder = {
+        id: Date.now(),
+        name,
+        whatsapp,
+        email,
+        service,
+        details,
+        orderTime: new Date().toISOString(),
+        status: 'pending'
+    };
+    
+    // Add to orders array
+    existingOrders.push(newOrder);
+    
+    // Save to localStorage
+    localStorage.setItem('orders', JSON.stringify(existingOrders));
+    
+    // Close order modal and show success modal
+    orderModal.classList.remove('active');
+    
+    // Set order time
+    const now = new Date();
+    orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+    
+    // Show success modal
+    successModal.classList.add('active');
+    
+    // Reset form
+    orderForm.reset();
+}
