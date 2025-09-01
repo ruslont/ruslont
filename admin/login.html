@@ -1,162 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Ruslon Toraboyev</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            padding: 20px;
-        }
-        
-        .login-box {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-        
-        .login-logo {
-            margin-bottom: 30px;
-        }
-        
-        .login-logo img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--primary);
-        }
-        
-        .login-title {
-            font-family: 'Montserrat', sans-serif;
-            color: var(--primary);
-            margin-bottom: 30px;
-        }
-        
-        .login-form .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-        
-        .login-form label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        
-        .login-form .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Raleway', sans-serif;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-        
-        .login-form .form-control:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Raleway', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .login-btn:hover {
-            background: var(--secondary);
-        }
-        
-        .error-message {
-            color: var(--danger);
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .back-link {
-            display: block;
-            margin-top: 20px;
-            color: var(--primary);
-            text-decoration: none;
-        }
-        
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login - Ruslon Toraboyev</title>
+
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9fafb;
+    }
+
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      padding: 20px;
+    }
+
+    .login-box {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .login-logo {
+      margin-bottom: 30px;
+    }
+
+    .login-logo img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+    }
+
+    .login-box h2 {
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .error-message {
+      margin-top: 15px;
+      color: red;
+      font-size: 0.9rem;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <div class="login-logo">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Ruslon Toraboyev">
-            </div>
-            
-            <h2 class="login-title">Admin Panel Login</h2>
-            
-            <form class="login-form" id="loginForm">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" class="form-control" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" class="form-control" required>
-                </div>
-                
-                <button type="submit" class="login-btn">Login</button>
-                
-                <div class="error-message" id="errorMessage">
-                    Invalid username or password. Please try again.
-                </div>
-            </form>
-            
-            <a href="../index.html" class="back-link">← Back to Main Site</a>
+  <div class="login-container">
+    <div class="login-box">
+      <div class="login-logo">
+        <img src="https://via.placeholder.com/80" alt="Admin Logo" />
+      </div>
+      <h2>Admin Login</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username"><i class="fa fa-user"></i> Username</label>
+          <input type="text" id="username" placeholder="Enter username" required />
         </div>
+        <div class="form-group">
+          <label for="password"><i class="fa fa-lock"></i> Password</label>
+          <input type="password" id="password" placeholder="Enter password" required />
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <p class="error-message" id="login-error">Invalid username or password</p>
+      </form>
     </div>
+  </div>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            // Login va parolni tekshirish
-            if (username === 'truslon' && password === 'ruslonbek11') {
-                // To'g'ri kiritilgan bo'lsa, admin paneliga yo'naltirish
-                localStorage.setItem('adminAuthenticated', 'true');
-                window.location.href = 'index.html';
-            } else {
-                // Xato bo'lsa, xabarni ko'rsatish
-                document.getElementById('errorMessage').style.display = 'block';
-            }
-        });
-    </script>
+  <script src="script.js"></script>
 </body>
 </html>
