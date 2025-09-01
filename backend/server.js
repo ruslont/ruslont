@@ -316,3 +316,85 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+.
+// server.js faylining oxiriga quyidagilarni qo'shing:
+
+// Admin Login API
+app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username === 'truslon' && password === 'ruslonbek11') {
+        // Simple token generation (in real app use JWT)
+        const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
+        res.json({ 
+            success: true, 
+            message: 'Login successful',
+            token: token
+        });
+    } else {
+        res.status(401).json({ 
+            success: false, 
+            error: 'Invalid credentials' 
+        });
+    }
+});
+
+// Admin authentication middleware
+function authenticateAdmin(req, res, next) {
+    const token = req.headers.authorization;
+    
+    if (!token || !token.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Access token required' });
+    }
+    
+    // Simple token verification (in real app verify JWT)
+    const authToken = token.replace('Bearer ', '');
+    try {
+        const decoded = Buffer.from(authToken, 'base64').toString('utf-8');
+        const [username] = decoded.split(':');
+        
+        if (username === 'truslon') {
+            next();
+        } else {
+            res.status(401).json({ error: 'Invalid token' });
+        }
+    } catch (error) {
+        res.status(401).json({ error: 'Invalid token format' });
+    }
+}
+
+// Protect all admin routes
+app.use('/api/admin/*', authenticateAdmin);
+
+// Admin statistics
+app.get('/api/admin/statistics', (req, res) => {
+    try {
+        const orders = readData(dataPath, []);
+        const today = new Date().toDateString();
+        
+        const todayOrders = orders.filter(order => {
+            const orderDate = new Date(order.orderTime).toDateString();
+            return orderDate === today;
+        });
+        
+        const completedOrders = orders.filter(order => order.status === 'completed');
+        const pendingOrders = orders.filter(order => order.status === 'pending');
+        const inProgressOrders = orders.filter(order => order.status === 'in-progress');
+        
+        const completionRate = orders.length > 0 
+            ? Math.round((completedOrders.length / orders.length) * 100) 
+            : 0;
+
+        res.json({
+            totalOrders: orders.length,
+            todayOrders: todayOrders.length,
+            completedOrders: completedOrders.length,
+            pendingOrders: pendingOrders.length,
+            inProgressOrders: inProgressOrders.length,
+            completionRate: completionRate
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to get statistics' });
+    }
+});

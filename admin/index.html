@@ -9,24 +9,57 @@
 </head>
 <body>
     <div class="admin-container">
+        <!-- Login Form -->
+        <div class="login-container" id="login-container">
+            <div class="login-form">
+                <div class="login-header">
+                    <h2><i class="fas fa-lock"></i> Admin Login</h2>
+                    <p>Enter your credentials to access the admin panel</p>
+                </div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="username"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="username" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-key"></i> Password</label>
+                        <input type="password" id="password" placeholder="Enter password" required>
+                    </div>
+                    <button type="submit" class="btn btn-login">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+                <div class="login-footer">
+                    <p>Default credentials: <strong>truslon</strong> / <strong>ruslonbek11</strong></p>
+                </div>
+            </div>
+        </div>
 
         <!-- Admin Dashboard -->
-        <div class="dashboard" id="dashboard">
+        <div class="dashboard" id="dashboard" style="display: none;">
             <header class="admin-header">
-                <h1>Admin Dashboard</h1>
-                <div class="header-info">
-                    <span class="connection-status" id="connection-status">Checking connection...</span>
-                    <button class="btn btn-logout" id="logout-btn">Logout</button>
+                <div class="header-left">
+                    <h1><i class="fas fa-cog"></i> Admin Dashboard</h1>
+                    <span class="welcome-text">Welcome, <span id="admin-username">Administrator</span></span>
+                </div>
+                <div class="header-right">
+                    <span class="last-updated" id="last-updated">Last updated: Just now</span>
+                    <button class="btn btn-refresh" id="refresh-btn">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn btn-logout" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
                 </div>
             </header>
 
             <div class="admin-content">
                 <!-- Statistics Section -->
                 <section class="stats-section">
-                    <h2>Statistics</h2>
+                    <h2><i class="fas fa-chart-bar"></i> Statistics Overview</h2>
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="stat-icon">
+                            <div class="stat-icon total-orders">
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
                             <div class="stat-info">
@@ -35,7 +68,7 @@
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">
+                            <div class="stat-icon today-orders">
                                 <i class="fas fa-calendar-day"></i>
                             </div>
                             <div class="stat-info">
@@ -44,7 +77,16 @@
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">
+                            <div class="stat-icon pending-orders">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="pending-orders">0</h3>
+                                <p>Pending Orders</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon completed-orders">
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <div class="stat-info">
@@ -52,62 +94,43 @@
                                 <p>Completed Orders</p>
                             </div>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                            <div class="stat-info">
-                                <h3 id="completion-rate">0%</h3>
-                                <p>Completion Rate</p>
-                            </div>
-                        </div>
                     </div>
                 </section>
 
-                <!-- Service Demand Statistics -->
-                <section class="stats-section">
-                    <h2>Service Demand</h2>
-                    <div class="service-demand" id="service-demand">
-                        <div class="loading" id="service-loading">
-                            <div class="spinner"></div>
-                            <p>Loading service statistics...</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Orders Section -->
+                <!-- Active Orders Section -->
                 <section class="orders-section">
                     <div class="section-header">
-                        <h2>All Orders</h2>
+                        <h2><i class="fas fa-list"></i> Active Orders</h2>
                         <div class="controls">
                             <div class="search-box">
                                 <input type="text" id="search-orders" placeholder="Search orders...">
                                 <i class="fas fa-search"></i>
                             </div>
-                            <button class="btn btn-refresh" id="refresh-btn">
-                                <i class="fas fa-sync-alt"></i> Refresh
-                            </button>
+                            <div class="filter-buttons">
+                                <button class="filter-btn active" data-filter="all">All</button>
+                                <button class="filter-btn" data-filter="pending">Pending</button>
+                                <button class="filter-btn" data-filter="in-progress">In Progress</button>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="orders-table-container">
-                        <div class="loading" id="orders-loading">
-                            <div class="spinner"></div>
-                            <p>Loading orders...</p>
-                        </div>
-                        <table class="orders-table" id="orders-table" style="display: none;">
+                        <table class="orders-table">
                             <thead>
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Customer Name</th>
                                     <th>Service</th>
+                                    <th>Contact Info</th>
                                     <th>Order Time</th>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="orders-table-body">
-                                <!-- Orders will be populated here -->
+                                <tr>
+                                    <td colspan="7" class="no-orders">Loading orders...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -116,34 +139,33 @@
                 <!-- Completed Orders Section -->
                 <section class="orders-section">
                     <div class="section-header">
-                        <h2>Completed Orders</h2>
+                        <h2><i class="fas fa-check-double"></i> Completed Orders</h2>
                         <div class="filter-controls">
                             <select id="time-filter">
-                                <option value="all">All Time</option>
                                 <option value="today">Today</option>
                                 <option value="week">This Week</option>
                                 <option value="month">This Month</option>
+                                <option value="all" selected>All Time</option>
                             </select>
                         </div>
                     </div>
                     <div class="orders-table-container">
-                        <div class="loading" id="completed-loading">
-                            <div class="spinner"></div>
-                            <p>Loading completed orders...</p>
-                        </div>
-                        <table class="orders-table" id="completed-table" style="display: none;">
+                        <table class="orders-table">
                             <thead>
                                 <tr>
                                     <th>Order ID</th>
                                     <th>Customer Name</th>
-                                    <th>WhatsApp</th>
-                                    <th>Email</th>
                                     <th>Service</th>
+                                    <th>Contact Info</th>
+                                    <th>Order Time</th>
                                     <th>Completed Time</th>
+                                    <th>Details</th>
                                 </tr>
                             </thead>
                             <tbody id="completed-orders-table-body">
-                                <!-- Completed orders will be populated here -->
+                                <tr>
+                                    <td colspan="7" class="no-orders">No completed orders yet</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -154,17 +176,25 @@
         <!-- Order Detail Modal -->
         <div class="modal-overlay" id="order-detail-modal">
             <div class="modal">
-                <button class="close-modal" id="close-detail-modal">&times;</button>
-                <h2>Order Details</h2>
+                <button class="close-modal" id="close-detail-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2><i class="fas fa-info-circle"></i> Order Details</h2>
                 <div class="order-details" id="order-details">
                     <!-- Order details will be populated here -->
                 </div>
                 <div class="modal-actions">
-                    <button class="btn btn-start" id="start-order-btn">Start Order</button>
-                    <button class="btn btn-complete" id="complete-order-btn">Complete Order</button>
-                    <button class="btn btn-delete" id="delete-order-btn">Delete Order</button>
+                    <button class="btn btn-start" id="start-order-btn">
+                        <i class="fas fa-play"></i> Start Order
+                    </button>
+                    <button class="btn btn-complete" id="complete-order-btn">
+                        <i class="fas fa-check"></i> Complete Order
+                    </button>
+                    <button class="btn btn-delete" id="delete-order-btn">
+                        <i class="fas fa-trash"></i> Delete Order
+                    </button>
                     <div class="timer-container" id="timer-container" style="display: none;">
-                        <h3>Time Spent: <span id="order-timer">00:00:00</span></h3>
+                        <h3><i class="fas fa-clock"></i> Time Spent: <span id="order-timer">00:00:00</span></h3>
                     </div>
                 </div>
             </div>
