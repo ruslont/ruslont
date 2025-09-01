@@ -1,141 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login - Ruslon Toraboyev</title>
-
-  <!-- Font & Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
-  <!-- Custom Styles -->
-  <link rel="stylesheet" href="style.css" />
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    :root {
-      --primary: #4f46e5;
-      --primary-dark: #4338ca;
-    }
-
     body {
-      font-family: "Poppins", sans-serif;
       margin: 0;
       padding: 0;
-      background: #f9fafb;
-    }
-
-    .login-container {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      padding: 20px;
     }
 
     .login-box {
-      background: white;
-      border-radius: 15px;
-      padding: 40px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
-      text-align: center;
-    }
-
-    .login-logo {
-      margin-bottom: 30px;
-    }
-
-    .login-logo img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--primary);
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      width: 320px;
     }
 
     .login-box h2 {
-      margin-bottom: 20px;
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: #1f2937;
     }
 
-    .form-group {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: #333;
-    }
-
-    .form-group input {
+    .login-box input {
       width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      font-size: 1rem;
-      outline: none;
-      transition: border 0.3s;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
 
-    .form-group input:focus {
-      border-color: var(--primary);
-    }
-
-    .btn {
+    .login-box button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
+      background: #2563eb;
       border: none;
-      border-radius: 10px;
-      background: var(--primary);
-      color: white;
-      font-size: 1rem;
-      font-weight: 600;
+      color: #fff;
+      font-size: 16px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: 0.3s;
     }
 
-    .btn:hover {
-      background: var(--primary-dark);
+    .login-box button:hover {
+      background: #1d4ed8;
     }
 
-    .error-message {
-      margin-top: 15px;
+    .error {
       color: red;
-      font-size: 0.9rem;
-      display: none;
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-box">
-      <div class="login-logo">
-        <img src="https://via.placeholder.com/80" alt="Admin Logo" />
-      </div>
-      <h2>Admin Login</h2>
-      <form id="login-form">
-        <div class="form-group">
-          <label for="username"><i class="fa fa-user"></i> Username</label>
-          <input type="text" id="username" placeholder="Enter username" required />
-        </div>
-        <div class="form-group">
-          <label for="password"><i class="fa fa-lock"></i> Password</label>
-          <input type="password" id="password" placeholder="Enter password" required />
-        </div>
-        <button type="submit" class="btn">Login</button>
-        <p class="error-message" id="login-error">Invalid username or password</p>
-      </form>
-    </div>
+  <div class="login-box">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Login" required>
+      <input type="password" id="password" placeholder="Parol" required>
+      <button type="submit">Kirish</button>
+      <p class="error" id="errorMsg"></p>
+    </form>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      // Siz belgilagan login va parol
+      const adminUser = "truslon";
+      const adminPass = "ruslonbek11";
+
+      if (username === adminUser && password === adminPass) {
+        localStorage.setItem("loggedIn", "true"); // sessiyani saqlash
+        window.location.href = "index.html"; // admin panelga yo‘naltirish
+      } else {
+        document.getElementById("errorMsg").innerText = "Login yoki parol noto‘g‘ri!";
+      }
+    });
+  </script>
 </body>
 </html>
