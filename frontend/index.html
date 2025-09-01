@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruslon Toraboyev | Professional Freelancer Services</title>
+    <meta name="description" content="Professional freelancer services including translation, web design, logo design, 3D modeling, and more. Available in English and Russian.">
+    <meta property="og:image" content="https://example.com/freelancer-og-image.jpg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base Styles and Variables */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #9ca3af;
+            --success: #10b981;
+            --error: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            color: var(--dark);
+            background-color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 80px 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1, h2, h3, h4 {
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+        }
+
+        p {
+            margin-bottom: 1.5rem;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--primary);
+            transition: var(--transition);
+        }
+
+        button, .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        button:hover, .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e99a0c;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            padding: 15px 0;
+            transition: var(--transition);
+        }
+
+        header.scrolled {
+            padding: 10px 0;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+        }
+
+        nav ul li a {
+            color: var(--dark);
+            font-weight: 500;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        .language-switcher {
+            display: flex;
+            align-items: center;
+        }
+
+        .language-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            font-weight: 500;
+            color: var(--dark);
+            transition: var(--transition);
+        }
+
+        .language-btn.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        .hero h1 {
+            margin-bottom: 1.5rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #4b5563;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .typing-effect::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Services Section */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .service-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .service-icon {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            font-size: 2rem;
+        }
+
+        .service-content {
+            padding: 1.5rem;
+        }
+
+        .service-content h3 {
+            margin-bottom: 1rem;
+        }
+
+        .service-content p {
+            margin-bottom: 1.5rem;
+            color: #6b7280;
+        }
+
+        /* About Section */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-text h3 {
+            color: var(--primary);
+        }
+
+        .skills {
+            margin-top: 2rem;
+        }
+
+        .skills h4 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .skills ul {
+            list-style: none;
+        }
+
+        .skills ul li {
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .skills ul li::before {
+            content: '▹';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        /* Portfolio Section */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .portfolio-item {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .portfolio-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .portfolio-img {
+            overflow: hidden;
+        }
+
+        .placeholder-img {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .portfolio-info {
+            padding: 1.5rem;
+        }
+
+        .portfolio-info h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .portfolio-info p {
+            color: #6b7280;
+            margin-bottom: 0;
+        }
+
+        /* Contact Section */
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-info h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-details p {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .contact-details i {
+            margin-right: 1rem;
+            width: 20px;
+            color: var(--primary);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            padding: 2rem;
+            position: relative;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Success Message */
+        .success-message {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--success);
+            margin-bottom: 1.5rem;
+        }
+
+        .order-timer {
+            background-color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--secondary);
+            transform: translateY(-3px);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            h1 {
+                font-size: 2.8rem;
+            }
+            
+            h2 {
+                font-size: 2.2rem;
+            }
+            
+            nav ul {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background-color: white;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: var(--transition);
+            }
+            
+            nav ul.active {
+                left: 0;
+            }
+            
+            nav ul li {
+                margin: 1.5rem 0;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+
+            .about-content,
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.3rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .hero-buttons .btn {
+                width: 100%;
+                text-align: center;
+            }
+            
+            section {
+                padding: 60px 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                width: 95%;
+            }
+            
+            .services-grid,
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header id="header">
+        <div class="container header-container">
+            <a href="#" class="logo">Ruslon<span>Toraboyev</span></a>
+            
+            <nav>
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <ul id="nav-menu">
+                    <li><a href="#home" data-lang-key="home">Home</a></li>
+                    <li><a href="#services" data-lang-key="services">Services</a></li>
+                    <li><a href="#about" data-lang-key="about">About</a></li>
+                    <li><a href="#portfolio" data-lang-key="portfolio">Portfolio</a></li>
+                </ul>
+            </nav>
+            
+            <div class="language-switcher">
+                <button class="language-btn active" data-lang="en">EN</button>
+                <span>|</span>
+                <button class="language-btn" data-lang="ru">RU</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1 data-lang-key="heroTitle">Professional <span class="typing-effect"></span></h1>
+                <p data-lang-key="heroDesc">High-quality freelance services with attention to detail and fast turnaround times. Available in multiple languages.</p>
+                <div class="hero-buttons">
+                    <a href="#services" class="btn" data-lang-key="servicesBtn">My Services</a>
+                    <a href="#contact" class="btn btn-secondary" data-lang-key="contactBtn">Contact Me</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services">
+        <div class="container">
+            <h2 data-lang-key="servicesTitle">My Services</h2>
+            <div class="services-grid">
+                <!-- Service 1 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-language"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service1">Translation Work</h3>
+                        <p data-lang-key="service1Desc">Professional translation services in multiple languages with accuracy and cultural sensitivity.</p>
+                        <button class="btn order-btn" data-service="Translation Work" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+                
+                <!-- Service 2 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service2">Web Design</h3>
+                        <p data-lang-key="service2Desc">Custom website designs that are responsive, user-friendly, and visually appealing.</p>
+                        <button class="btn order-btn" data-service="Web Design" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+                
+                <!-- Service 3 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-signature"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service3">Logo Design</h3>
+                        <p data-lang-key="service3Desc">Unique and memorable logo designs that represent your brand identity.</p>
+                        <button class="btn order-btn" data-service="Logo Design" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+                
+                <!-- Service 4 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service4">Website Improvement</h3>
+                        <p data-lang-key="service4Desc">Enhance your existing website with improved functionality and modern design.</p>
+                        <button class="btn order-btn" data-service="Website Improvement" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+                
+                <!-- Service 5 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service5">Brand Development</h3>
+                        <p data-lang-key="service5Desc">Comprehensive brand development services to establish your market presence.</p>
+                        <button class="btn order-btn" data-service="Brand Development" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+                
+                <!-- Service 6 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service6">3D Business Cards</h3>
+                        <p data-lang-key="service6Desc">Innovative 3D business card designs that leave a lasting impression.</p>
+                        <button class="btn order-btn" data-service="3D Business Cards" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+                
+                <!-- Service 7 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service7">3D Models</h3>
+                        <p data-lang-key="service7Desc">Detailed 3D modeling services for various applications and industries.</p>
+                        <button class="btn order-btn" data-service="3D Models" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+                
+                <!-- Service 8 -->
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3 data-lang-key="service8">Banners & Advertising</h3>
+                        <p data-lang-key="service8Desc">Eye-catching banners and advertising materials for books, promotions, and events.</p>
+                        <button class="btn order-btn" data-service="Banners & Advertising" data-lang-key="orderNow">Order Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <h2 data-lang-key="aboutTitle">About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3 data-lang-key="aboutSubtitle">Ruslon Toraboyev</h3>
+                    <p data-lang-key="aboutDesc1">I am a professional freelancer with expertise in multiple domains including translation, web design, and 3D modeling. With years of experience, I deliver high-quality work that meets client expectations.</p>
+                    <p data-lang-key="aboutDesc2">My approach focuses on understanding client needs, clear communication, and delivering projects on time. I'm fluent in multiple languages and can work with clients from diverse backgrounds.</p>
+                    <div class="skills">
+                        <h4 data-lang-key="skillsTitle">My Skills</h4>
+                        <ul>
+                            <li data-lang-key="skill1">Web Design & Development</li>
+                            <li data-lang-key="skill2">Graphic Design & Logo Creation</li>
+                            <li data-lang-key="skill3">3D Modeling & Rendering</li>
+                            <li data-lang-key="skill4">Multilingual Translation</li>
+                            <li data-lang-key="skill5">Brand Development</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio">
+        <div class="container">
+            <h2 data-lang-key="portfolioTitle">Completed Projects</h2>
+            <div class="portfolio-grid">
+                <div class="portfolio-item">
+                    <div class="portfolio-img">
+                        <div class="placeholder-img" style="background-color: #2563eb; height: 200px; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-briefcase fa-3x"></i>
+                        </div>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3 data-lang-key="project1">E-commerce Website</h3>
+                        <p data-lang-key="project1Desc">Fully responsive online store with payment integration</p>
+                    </div>
+                </div>
+                
+                <div class="portfolio-item">
+                    <div class="portfolio-img">
+                        <div class="placeholder-img" style="background-color: #f59e0b; height: 200px; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-drafting-compass fa-3x"></i>
+                        </div>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3 data-lang-key="project2">Brand Identity</h3>
+                        <p data-lang-key="project2Desc">Complete branding package for a startup company</p>
+                    </div>
+                </div>
+                
+                <div class="portfolio-item">
+                    <div class="portfolio-img">
+                        <div class="placeholder-img" style="background-color: #10b981; height: 200px; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-cube fa-3x"></i>
+                        </div>
+                    </div>
+                    <div class="portfolio-info">
+                        <h3 data-lang-key="project3">3D Product Models</h3>
+                        <p data-lang-key="project3Desc">Series of 3D models for product visualization</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="container">
+            <h2 data-lang-key="contactTitle">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3 data-lang-key="contactSubtitle">Contact Information</h3>
+                    <p data-lang-key="contactDesc">Feel free to reach out for project inquiries or collaboration opportunities.</p>
+                    <div class="contact-details">
+                        <p><i class="fas fa-envelope"></i> example@email.com</p>
+                        <p><i class="fas fa-phone"></i> +123 456 7890</p>
+                        <p><i class="fas fa-map-marker-alt"></i> <span data-lang-key="location">City, Country</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <h3>Ruslon Toraboyev</h3>
+                <p data-lang-key="footerDesc">Professional Freelancer Services</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+                <p>&copy; 2023 All Rights Reserved</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Order Modal -->
+    <div class="modal-overlay" id="order-modal">
+        <div class="modal">
+            <button class="close-modal" id="close-order-modal">&times;</button>
+            <h2 data-lang-key="orderTitle">Place Your Order</h2>
+            <form id="order-form">
+                <div class="form-group">
+                    <label for="service" data-lang-key="serviceLabel">Service</label>
+                    <input type="text" id="service" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="name" data-lang-key="nameLabel">Your Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="whatsapp" data-lang-key="whatsappLabel">WhatsApp Number</label>
+                    <input type="tel" id="whatsapp" required>
+                </div>
+                <div class="form-group">
+                    <label for="email" data-lang-key="emailLabel">Email Address</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="details" data-lang-key="detailsLabel">Project Details</label>
+                    <textarea id="details" required></textarea>
+                </div>
+                <div class="loading" id="form-loading">
+                    <div class="spinner"></div>
+                    <p>Submitting your order...</p>
+                </div>
+                <button type="submit" class="btn" id="submit-order-btn" data-lang-key="submitOrder">Submit Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal">
+            <div class="success-message">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 data-lang-key="successTitle">Thank You!</h3>
+                <p data-lang-key="successMessage">Thank you for your order. Ruslon Toraboyev will contact you shortly.</p>
+                <div class="order-timer">
+                    <p data-lang-key="orderTime">Order time: <span id="order-time">00:00:00</span></p>
+                </div>
+                <button class="btn" id="close-success-modal" data-lang-key="closeBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language Data
+        const translations = {
+            en: {
+                home: "Home",
+                services: "Services",
+                about: "About",
+                portfolio: "Portfolio",
+                heroTitle: "Professional Freelance Services",
+                heroDesc: "High-quality freelance services with attention to detail and fast turnaround times. Available in multiple languages.",
+                servicesBtn: "My Services",
+                contactBtn: "Contact Me",
+                servicesTitle: "My Services",
+                service1: "Translation Work",
+                service1Desc: "Professional translation services in multiple languages with accuracy and cultural sensitivity.",
+                service2: "Web Design",
+                service2Desc: "Custom website designs that are responsive, user-friendly, and visually appealing.",
+                service3: "Logo Design",
+                service3Desc: "Unique and memorable logo designs that represent your brand identity.",
+                service4: "Website Improvement",
+                service4Desc: "Enhance your existing website with improved functionality and modern design.",
+                service5: "Brand Development",
+                service5Desc: "Comprehensive brand development services to establish your market presence.",
+                service6: "3D Business Cards",
+                service6Desc: "Innovative 3D business card designs that leave a lasting impression.",
+                service7: "3D Models",
+                service7Desc: "Detailed 3D modeling services for various applications and industries.",
+                service8: "Banners & Advertising",
+                service8Desc: "Eye-catching banners and advertising materials for books, promotions, and events.",
+                orderNow: "Order Now",
+                aboutTitle: "About Me",
+                aboutSubtitle: "Ruslon Toraboyev",
+                aboutDesc1: "I am a professional freelancer with expertise in multiple domains including translation, web design, and 3D modeling. With years of experience, I deliver high-quality work that meets client expectations.",
+                aboutDesc2: "My approach focuses on understanding client needs, clear communication, and delivering projects on time. I'm fluent in multiple languages and can work with clients from diverse backgrounds.",
+                skillsTitle: "My Skills",
+                skill1: "Web Design & Development",
+                skill2: "Graphic Design & Logo Creation",
+                skill3: "3D Modeling & Rendering",
+                skill4: "Multilingual Translation",
+                skill5: "Brand Development",
+                portfolioTitle: "Completed Projects",
+                project1: "E-commerce Website",
+                project1Desc: "Fully responsive online store with payment integration",
+                project2: "Brand Identity",
+                project2Desc: "Complete branding package for a startup company",
+                project3: "3D Product Models",
+                project3Desc: "Series of 3D models for product visualization",
+                contactTitle: "Get In Touch",
+                contactSubtitle: "Contact Information",
+                contactDesc: "Feel free to reach out for project inquiries or collaboration opportunities.",
+                location: "City, Country",
+                footerDesc: "Professional Freelancer Services",
+                orderTitle: "Place Your Order",
+                serviceLabel: "Service",
+                nameLabel: "Your Name",
+                whatsappLabel: "WhatsApp Number",
+                emailLabel: "Email Address",
+                detailsLabel: "Project Details",
+                submitOrder: "Submit Order",
+                successTitle: "Thank You!",
+                successMessage: "Thank you for your order. Ruslon Toraboyev will contact you shortly.",
+                orderTime: "Order time:",
+                closeBtn: "Close"
+            },
+            ru: {
+                home: "Главная",
+                services: "Услуги",
+                about: "Обо мне",
+                portfolio: "Портфолио",
+                heroTitle: "Профессиональные Фриланс Услуги",
+                heroDesc: "Высококачественные фриланс-услуги с вниманием к деталям и быстрыми сроками выполнения. Доступно на нескольких языках.",
+                servicesBtn: "Мои Услуги",
+                contactBtn: "Связаться",
+                servicesTitle: "Мои Услуги",
+                service1: "Переводческие работы",
+                service1Desc: "Профессиональные услуги перевода на multiple languages с точностью и культурной чувствительностью.",
+                service2: "Веб-дизайн",
+                service2Desc: "Индивидуальные дизайны веб-сайтов, которые адаптивны, удобны для пользователя и визуально привлекательны.",
+                service3: "Дизайн логотипа",
+                service3Desc: "Уникальные и запоминающиеся дизайны логотипов, которые представляют идентичность вашего бренда.",
+                service4: "Улучшение веб-сайта",
+                service4Desc: "Улучшите свой существующий веб-сайт с улучшенной функциональностью и современным дизайном.",
+                service5: "Развитие бренда",
+                service5Desc: "Комплексные услуги по развитию бренда для установления вашего присутствия на рынке.",
+                service6: "3D визитки",
+                service6Desc: "Инновационные дизайны 3D визиток, которые оставляют lasting impression.",
+                service7: "3D модели",
+                service7Desc: "Детальные услуги 3D моделирования для различных приложений и отраслей.",
+                service8: "Баннеры и реклама",
+                service8Desc: "Привлекающие внимание баннеры и рекламные материалы для книг, промоакций и мероприятий.",
+                orderNow: "Заказать Сейчас",
+                aboutTitle: "Обо Мне",
+                aboutSubtitle: "Руслон Торабоев",
+                aboutDesc1: "Я профессиональный фрилансер с опытом работы в multiple domains, включая перевод, веб-дизайн и 3D моделирование. Имея многолетний опыт, я предоставляю высококачественную работу, соответствующую ожиданиям клиентов.",
+                aboutDesc2: "Мой подход focuses on пониманием потребностей клиентов, четкой коммуникацией и своевременной delivery проектов. Я свободно владею multiple languages и могу работать с клиентами из разных стран.",
+                skillsTitle: "Мои Навыки",
+                skill1: "Веб-дизайн и разработка",
+                skill2: "Графический дизайн и создание логотипов",
+                skill3: "3D моделирование и рендеринг",
+                skill4: "Многоязычный перевод",
+                skill5: "Развитие бренда",
+                portfolioTitle: "Завершенные Проекты",
+                project1: "Интернет-магазин",
+                project1Desc: "Полностью адаптивный интернет-магазин с интеграцией платежей",
+                project2: "Идентичность бренда",
+                project2Desc: "Полный пакет брендинга для стартап-компании",
+                project3: "3D модели продуктов",
+                project3Desc: "Серия 3D моделей для визуализации продуктов",
+                contactTitle: "Связаться",
+                contactSubtitle: "Контактная информация",
+                contactDesc: "Не стесняйтесь обращаться по вопросам проектов или возможностей сотрудничества.",
+                location: "Город, Страна",
+                footerDesc: "Профессиональные Фриланс Услуги",
+                orderTitle: "Разместите Ваш Заказ",
+                serviceLabel: "Услуга",
+                nameLabel: "Ваше Имя",
+                whatsappLabel: "Номер WhatsApp",
+                emailLabel: "Email Адрес",
+                detailsLabel: "Детали Проекта",
+                submitOrder: "Отправить Заказ",
+                successTitle: "Спасибо!",
+                successMessage: "Спасибо за ваш заказ. Руслон Торабоев свяжется с вами в ближайшее время.",
+                orderTime: "Время заказа:",
+                closeBtn: "Закрыть"
+            }
+        };
+
+        // Current language
+        let currentLang = 'en';
+
+        // DOM Elements
+        const header = document.getElementById('header');
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('nav-menu');
+        const languageBtns = document.querySelectorAll('.language-btn');
+        const orderBtns = document.querySelectorAll('.order-btn');
+        const orderModal = document.getElementById('order-modal');
+        const closeOrderModal = document.getElementById('close-order-modal');
+        const orderForm = document.getElementById('order-form');
+        const serviceInput = document.getElementById('service');
+        const successModal = document.getElementById('success-modal');
+        const closeSuccessModal = document.getElementById('close-success-modal');
+        const orderTime = document.getElementById('order-time');
+        const typingElement = document.querySelector('.typing-effect');
+        const formLoading = document.getElementById('form-loading');
+        const submitOrderBtn = document.getElementById('submit-order-btn');
+
+        // Typing Animation
+        const typingTexts = ['Freelance Services', 'Web Design', '3D Modeling', 'Translation'];
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function type() {
+            const currentText = typingTexts[textIndex];
+            
+            if (isDeleting) {
+                typingElement.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                typingElement.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+            }
+            
+            let typeSpeed = isDeleting ? 50 : 100;
+            
+            if (!isDeleting && charIndex === currentText.length) {
+                typeSpeed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                textIndex = (textIndex + 1) % typingTexts.length;
+                typeSpeed = 500;
+            }
+            
+            setTimeout(type, typeSpeed);
+        }
+
+        // Scroll Animation
+        function checkScroll() {
+            const sections = document.querySelectorAll('section');
+            const windowHeight = window.innerHeight;
+            
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                if (sectionTop < windowHeight - 100) {
+                    section.classList.add('visible');
+                    
+                    // Animate service cards with delay
+                    if (section.id === 'services') {
+                        const serviceCards = document.querySelectorAll('.service-card');
+                        serviceCards.forEach((card, index) => {
+                            setTimeout(() => {
+                                card.classList.add('visible');
+                            }, index * 150);
+                        });
+                    }
+                }
+            });
+            
+            // Header background on scroll
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        // Change Language
+        function changeLanguage(lang) {
+            currentLang = lang;
+            
+            // Update language buttons
+            languageBtns.forEach(btn => {
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Update all elements with data-lang-key
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = translations[lang][key];
+                    } else {
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            });
+        }
+
+        // Order Modal
+        function openOrderModal(service) {
+            serviceInput.value = service;
+            orderModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModals() {
+            orderModal.classList.remove('active');
+            successModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Form Submission (backend bilan ishlaydigan versiya)
+        function handleOrderSubmit(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            const email = document.getElementById('email').value;
+            const details = document.getElementById('details').value;
+            const service = serviceInput.value;
+            
+            // Show loading, hide submit button
+            formLoading.style.display = 'block';
+            submitOrderBtn.style.display = 'none';
+            
+            // Backendga so'rov yuborish
+            fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name,
+                    whatsapp,
+                    email,
+                    service,
+                    details
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Close order modal and show success modal
+                orderModal.classList.remove('active');
+                
+                // Set order time
+                const now = new Date();
+                orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+                
+                // Show success modal
+                successModal.classList.add('active');
+                
+                // Reset form
+                orderForm.reset();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Xatolik yuz berdi. Iltimos, keyinroq urunib ko\'ring. ' + error.message);
+            })
+            .finally(() => {
+                // Hide loading, show submit button
+                formLoading.style.display = 'none';
+                submitOrderBtn.style.display = 'block';
+            });
+        }
+
+        // Event Listeners
+        window.addEventListener('scroll', checkScroll);
+        window.addEventListener('load', checkScroll);
+
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        languageBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                changeLanguage(btn.dataset.lang);
+            });
+        });
+
+        orderBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                openOrderModal(btn.dataset.service);
+            });
+        });
+
+        closeOrderModal.addEventListener('click', closeModals);
+        closeSuccessModal.addEventListener('click', closeModals);
+
+        orderForm.addEventListener('submit', handleOrderSubmit);
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target === orderModal || e.target === successModal) {
+                closeModals();
+            }
+        });
+
+        // Initialize
+        type();
+        checkScroll();
+    </script>
+</body>
+</html>

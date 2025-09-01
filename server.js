@@ -9,8 +9,9 @@ const PORT = process.env.PORT || 3000;
 // Middleware lar
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 // Ma'lumotlar bazasi (faqat demo, haqiqiy loyihada MongoDB yoki PostgreSQL ishlatish kerak)
 let orders = [];
 let freelancers = [];

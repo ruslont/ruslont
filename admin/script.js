@@ -1,538 +1,770 @@
-// Admin paneli JavaScript kodi
+// Admin credentials
+const ADMIN_CREDENTIALS = {
+    username: 'truslon',
+    password: 'ruslonbek11'
+};
 
-// Autentifikatsiyani tekshirish
-function checkAuth() {
-    if (localStorage.getItem('adminAuthenticated') !== 'true') {
-        window.location.href = 'login.html';
+// Global variables
+let orders = [];
+let currentOrder = null;
+let timerInterval = null;
+let isBackendOnline = false;
+let authToken = null;
+
+// DOM Elements
+const loginContainer = document.getElementById('login-container');
+const dashboard = document.getElementById('dashboard');
+const loginForm = document.getElementById('login-form');
+const logoutBtn = document.getElementById('logout-btn');
+const ordersTableBody = document.getElementById('orders-table-body');
+const completedOrdersTableBody = document.getElementById('completed-orders-table-body');
+const orderDetailModal = document.getElementById('order-detail-modal');
+const closeDetailModal = document.getElementById('close-detail-modal');
+const orderDetails = document.getElementById('order-details');
+const startOrderBtn = document.getElementById('start-order-btn');
+const completeOrderBtn = document.getElementById('complete-order-btn');
+const deleteOrderBtn = document.getElementById('delete-order-btn');
+const timerContainer = document.getElementById('timer-container');
+const orderTimer = document.getElementById('order-timer');
+const searchInput = document.getElementById('search-orders');
+const refreshBtn = document.getElementById('refresh-btn');
+const timeFilter = document.getElementById('time-filter');
+const connectionStatus = document.getElementById('connection-status');
+const totalOrdersElement = document.getElementById('total-orders');
+const todayOrdersElement = document.getElementById('today-orders');
+const completedOrdersElement = document.getElementById('completed-orders');
+const completionRateElement = document.getElementById('completion-rate');
+const serviceDemandElement = document.getElementById('service-demand');
+const serviceLoading = document.getElementById('service-loading');
+const ordersLoading = document.getElementById('orders-loading');
+const ordersTable = document.getElementById('orders-table');
+const completedLoading = document.getElementById('completed-loading');
+const completedTable = document.getElementById('completed-table');
+
+// API Base URL
+const API_BASE_URL = '/api';
+
+// Check if user is already logged in
+function checkLoginStatus() {
+    const token = localStorage.getItem('adminToken');
+    const savedUsername = localStorage.getItem('adminUsername');
+    
+    if (token && savedUsername === ADMIN_CREDENTIALS.username) {
+        authToken = token;
+        showDashboard();
+    }
+}
+
+// Login function
+async function handleLogin(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        // Generate simple token (in real app, this would come from server)
+        const token = btoa(`${username}:${Date.now()}`);
+        authToken = token;
+        
+        localStorage.setItem('adminToken', token);
+        localStorage.setItem('adminUsername', username);
+        
+        showDashboard();
+    } else {
+        showNotification('Invalid username or password', 'error');
+    }
+}
+
+// Logout function
+function handleLogout() {
+    authToken = null;
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUsername');
+    loginContainer.style.display = 'flex';
+    dashboard.style.display = 'none';
+    loginForm.reset();
+}
+
+// Show dashboard
+function showDashboard() {
+    loginContainer.style.display = 'none';
+    dashboard.style.display = 'block';
+    loadAllData();
+}
+
+// Check backend connection
+async function checkBackendConnection() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/health`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (response.ok) {
+            isBackendOnline = true;
+            updateConnectionStatus('connected', 'Connected to backend');
+            return true;
+        } else {
+            throw new Error('Health check failed');
+        }
+    } catch (error) {
+        isBackendOnline = false;
+        updateConnectionStatus('disconnected', 'Backend connection failed');
         return false;
     }
-    return true;
 }
 
-// Chiqish funksiyasi
-function logout() {
-    localStorage.removeItem('adminAuthenticated');
-    window.location.href = 'login.html';
+// Update connection status
+function updateConnectionStatus(status, message) {
+    connectionStatus.textContent = message;
+    connectionStatus.className = `connection-status ${status}`;
 }
 
-// Ma'lumotlarni o'qish LocalStorage dan
-function getData(key) {
-    const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
+// Load all data
+async function loadAllData() {
+    await checkBackendConnection();
+    await loadOrders();
+    await loadStatistics();
+    await loadServiceDemand();
 }
 
-// Ma'lumotlarni yangilash
-function updateData(key, data) {
-    localStorage.setItem(key, JSON.stringify(data));
-}
-
-// Dashboard statistikasini yangilash
-function updateDashboard() {
-    if (!checkAuth()) return;
+// Load orders from backend
+async function loadOrders() {
+    showLoading(ordersLoading, ordersTable);
     
-    const orders = getData('orders');
-    const completedOrders = getData('completedOrders');
-    const freelancers = getData('freelancers');
-    
-    document.getElementById('ordersCount').textContent = orders.length;
-    document.getElementById('completedCount').textContent = completedOrders.length;
-    document.getElementById('freelancersCount').textContent = freelancers.length;
-    
-    // Pending jobs - statusi "pending" bo'lgan buyurtmalar
-    const pendingOrders = orders.filter(order => order.status === 'pending');
-    document.getElementById('pendingCount').textContent = pendingOrders.length;
-}
-
-// Buyurtmalarni yuklash
-function loadOrders() {
-    if (!checkAuth()) return;
-    
-    const orders = getData('orders');
-    const ordersTable = document.getElementById('ordersTableBody');
-    
-    if (ordersTable) {
-        ordersTable.innerHTML = '';
-        
-        if (orders.length === 0) {
-            ordersTable.innerHTML = '<tr><td colspan="8" style="text-align: center;">No orders found</td></tr>';
-            return;
-        }
-        
-        orders.forEach(order => {
-            const row = document.createElement('tr');
-            
-            row.innerHTML = `
-                <td>#${order.id}</td>
-                <td>${order.clientName || 'N/A'}</td>
-                <td>${order.package || 'N/A'}</td>
-                <td>${order.clientWhatsApp || 'N/A'}</td>
-                <td>${order.clientEmail || 'N/A'}</td>
-                <td>${new Date(order.date).toLocaleDateString()}</td>
-                <td><span class="status status-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
-                <td>
-                    <button class="action-btn btn-complete" data-id="${order.id}">Complete</button>
-                    <button class="action-btn btn-view" data-id="${order.id}">View</button>
-                    <button class="action-btn btn-delete" data-id="${order.id}">Delete</button>
-                </td>
-            `;
-            
-            ordersTable.appendChild(row);
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
         });
         
-        // Harakatlar tugmalariga hodisa qo'shish
-        document.querySelectorAll('.btn-complete').forEach(btn => {
-            btn.addEventListener('click', function() {
-                completeOrder(this.getAttribute('data-id'));
-            });
-        });
+        if (!response.ok) throw new Error('Failed to fetch orders');
         
-        document.querySelectorAll('.btn-view').forEach(btn => {
-            btn.addEventListener('click', function() {
-                viewOrderDetails(this.getAttribute('data-id'));
-            });
-        });
-        
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', function() {
-                deleteOrder(this.getAttribute('data-id'));
-            });
-        });
+        orders = await response.json();
+        renderOrdersTable();
+        renderCompletedOrdersTable();
+        hideLoading(ordersLoading, ordersTable);
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        showNotification('Failed to load orders', 'error');
+        hideLoading(ordersLoading, ordersTable);
     }
 }
 
-// Buyurtma tafsilotlarini ko'rsatish
+// Load statistics
+async function loadStatistics() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/statistics`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch statistics');
+        
+        const stats = await response.json();
+        updateStatistics(stats);
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        // Calculate stats locally as fallback
+        calculateLocalStatistics();
+    }
+}
+
+// Load service demand
+async function loadServiceDemand() {
+    showLoading(serviceLoading, null);
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/service-demand`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to fetch service demand');
+        
+        const serviceDemand = await response.json();
+        renderServiceDemand(serviceDemand);
+        hideLoading(serviceLoading, null);
+    } catch (error) {
+        console.error('Error loading service demand:', error);
+        hideLoading(serviceLoading, null);
+    }
+}
+
+// Calculate statistics locally (fallback)
+function calculateLocalStatistics() {
+    const today = new Date().toDateString();
+    const todayOrders = orders.filter(order => {
+        const orderDate = new Date(order.orderTime).toDateString();
+        return orderDate === today;
+    });
+    
+    const completedOrders = orders.filter(order => order.status === 'completed');
+    const completionRate = orders.length > 0 
+        ? Math.round((completedOrders.length / orders.length) * 100) 
+        : 0;
+    
+    updateStatistics({
+        totalOrders: orders.length,
+        todayOrders: todayOrders.length,
+        completedOrders: completedOrders.length,
+        completionRate: completionRate
+    });
+}
+
+// Update statistics display
+function updateStatistics(stats) {
+    totalOrdersElement.textContent = stats.totalOrders;
+    todayOrdersElement.textContent = stats.todayOrders;
+    completedOrdersElement.textContent = stats.completedOrders;
+    completionRateElement.textContent = `${stats.completionRate}%`;
+}
+
+// Render service demand
+function renderServiceDemand(serviceDemand) {
+    if (Object.keys(serviceDemand).length === 0) {
+        serviceDemandElement.innerHTML = '<p>No service demand data available</p>';
+        return;
+    }
+    
+    const sortedServices = Object.entries(serviceDemand)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5); // Show top 5 services
+    
+    let html = '';
+    sortedServices.forEach(([service, count]) => {
+        html += `
+            <div class="service-item">
+                <span class="service-name">${service}</span>
+                <span class="service-count">${count}</span>
+            </div>
+        `;
+    });
+    
+    serviceDemandElement.innerHTML = html;
+}
+
+// Render orders table
+function renderOrdersTable() {
+    ordersTableBody.innerHTML = '';
+    
+    const filteredOrders = orders.filter(order => order.status !== 'completed');
+    
+    if (filteredOrders.length === 0) {
+        ordersTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">
+                    No pending orders found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    filteredOrders.forEach(order => {
+        const tr = document.createElement('tr');
+        
+        const orderTime = new Date(order.orderTime);
+        const formattedTime = orderTime.toLocaleString();
+        
+        tr.innerHTML = `
+            <td>${order.id}</td>
+            <td>${order.name}</td>
+            <td>${order.service}</td>
+            <td>${formattedTime}</td>
+            <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+            <td>
+                <button class="action-btn btn-view" data-id="${order.id}">View</button>
+            </td>
+        `;
+        
+        ordersTableBody.appendChild(tr);
+    });
+    
+    // Add event listeners to view buttons
+    document.querySelectorAll('.btn-view').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const orderId = btn.getAttribute('data-id');
+            viewOrderDetails(orderId);
+        });
+    });
+}
+
+// Render completed orders table
+function renderCompletedOrdersTable() {
+    completedOrdersTableBody.innerHTML = '';
+    
+    let completedOrders = orders.filter(order => order.status === 'completed');
+    
+    // Apply time filter
+    const filterValue = timeFilter.value;
+    if (filterValue !== 'all') {
+        const now = new Date();
+        completedOrders = completedOrders.filter(order => {
+            const orderDate = new Date(order.orderTime);
+            
+            switch (filterValue) {
+                case 'today':
+                    return orderDate.toDateString() === now.toDateString();
+                case 'week':
+                    const weekStart = new Date(now);
+                    weekStart.setDate(now.getDate() - now.getDay());
+                    weekStart.setHours(0, 0, 0, 0);
+                    return orderDate >= weekStart;
+                case 'month':
+                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    return orderDate >= monthStart;
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    if (completedOrders.length === 0) {
+        completedOrdersTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">
+                    No completed orders found
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    completedOrders.forEach(order => {
+        const tr = document.createElement('tr');
+        
+        const orderTime = new Date(order.orderTime);
+        const formattedTime = orderTime.toLocaleString();
+        
+        // Mask sensitive information
+        const maskedWhatsApp = maskString(order.whatsapp, 3, 4);
+        const maskedEmail = maskEmail(order.email);
+        
+        tr.innerHTML = `
+            <td>${order.id}</td>
+            <td>${order.name}</td>
+            <td>${maskedWhatsApp}</td>
+            <td>${maskedEmail}</td>
+            <td>${order.service}</td>
+            <td>${formattedTime}</td>
+        `;
+        
+        completedOrdersTableBody.appendChild(tr);
+    });
+}
+
+// Mask string for privacy
+function maskString(str, visibleStart, visibleEnd) {
+    if (str.length <= visibleStart + visibleEnd) {
+        return str;
+    }
+    
+    const start = str.substring(0, visibleStart);
+    const end = str.substring(str.length - visibleEnd);
+    const masked = '*'.repeat(str.length - visibleStart - visibleEnd);
+    
+    return start + masked + end;
+}
+
+// Mask email for privacy
+function maskEmail(email) {
+    const parts = email.split('@');
+    if (parts.length !== 2) return email;
+    
+    const username = parts[0];
+    const domain = parts[1];
+    
+    if (username.length <= 2) {
+        return username + '@' + domain;
+    }
+    
+    const maskedUsername = username.substring(0, 3) + '*'.repeat(username.length - 3);
+    return maskedUsername + '@' + domain;
+}
+
+// View order details
 function viewOrderDetails(orderId) {
-    if (!checkAuth()) return;
+    currentOrder = orders.find(order => order.id == orderId);
     
-    const orders = getData('orders');
-    const order = orders.find(order => order.id == orderId);
+    if (!currentOrder) return;
     
-    if (order) {
-        const modal = document.getElementById('orderDetailsModal');
-        const content = document.getElementById('orderDetailsContent');
+    const orderTime = new Date(currentOrder.orderTime);
+    const formattedTime = orderTime.toLocaleString();
+    
+    orderDetails.innerHTML = `
+        <div class="detail-item">
+            <h4>Order ID</h4>
+            <p>${currentOrder.id}</p>
+        </div>
+        <div class="detail-item">
+            <h4>Customer Name</h4>
+            <p>${currentOrder.name}</p>
+        </div>
+        <div class="detail-item">
+            <h4>WhatsApp Number</h4>
+            <p>${currentOrder.whatsapp}</p>
+        </div>
+        <div class="detail-item">
+            <h4>Email Address</h4>
+            <p>${currentOrder.email}</p>
+        </div>
+        <div class="detail-item">
+            <h4>Service</h4>
+            <p>${currentOrder.service}</p>
+        </div>
+        <div class="detail-item">
+            <h4>Order Time</h4>
+            <p>${formattedTime}</p>
+        </div>
+        <div class="detail-item">
+            <h4>Project Details</h4>
+            <p>${currentOrder.details}</p>
+        </div>
+        <div class="detail-item">
+            <h4>Status</h4>
+            <p><span class="status-badge status-${currentOrder.status}">${currentOrder.status}</span></p>
+        </div>
+    `;
+    
+    // Show/hide buttons based on status
+    if (currentOrder.status === 'pending') {
+        startOrderBtn.style.display = 'block';
+        completeOrderBtn.style.display = 'none';
+        deleteOrderBtn.style.display = 'block';
+        timerContainer.style.display = 'none';
+    } else if (currentOrder.status === 'in-progress') {
+        startOrderBtn.style.display = 'none';
+        completeOrderBtn.style.display = 'block';
+        deleteOrderBtn.style.display = 'block';
+        timerContainer.style.display = 'block';
         
-        content.innerHTML = `
-            <div class="detail-item">
-                <div class="detail-label">Order ID</div>
-                <div class="detail-value">#${order.id}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Client Name</div>
-                <div class="detail-value">${order.clientName || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Service Package</div>
-                <div class="detail-value">${order.package || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Contact Information</div>
-                <div class="contact-info-full">
-                    <div><i class="fas fa-phone"></i> ${order.clientWhatsApp || 'N/A'}</div>
-                    <div><i class="fas fa-envelope"></i> ${order.clientEmail || 'N/A'}</div>
-                </div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Order Date</div>
-                <div class="detail-value">${new Date(order.date).toLocaleDateString()}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Status</div>
-                <div class="detail-value"><span class="status status-${order.status || 'pending'}">${order.status || 'pending'}</span></div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Additional Message</div>
-                <div class="detail-value">${order.clientMessage || 'No additional message'}</div>
-            </div>
-        `;
-        
-        modal.style.display = 'flex';
+        // Start timer if not already started
+        if (!timerInterval && currentOrder.startTime) {
+            startTimer();
+        }
+    } else {
+        startOrderBtn.style.display = 'none';
+        completeOrderBtn.style.display = 'none';
+        deleteOrderBtn.style.display = 'block';
+        timerContainer.style.display = 'none';
     }
+    
+    orderDetailModal.classList.add('active');
 }
 
-// Buyurtmani bajarilgan deb belgilash
-function completeOrder(orderId) {
-    if (!checkAuth()) return;
+// Start order
+async function startOrder() {
+    if (!currentOrder) return;
     
-    const orders = getData('orders');
-    const orderIndex = orders.findIndex(order => order.id == orderId);
-    
-    if (orderIndex !== -1) {
-        orders[orderIndex].status = 'completed';
-        updateData('orders', orders);
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${currentOrder.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                status: 'in-progress',
+                startTime: new Date().toISOString()
+            })
+        });
         
-        // Bajarilgan buyurtmalar ro'yxatiga qo'shish
-        const completedOrders = getData('completedOrders');
-        orders[orderIndex].completedDate = new Date().toISOString();
-        completedOrders.push(orders[orderIndex]);
-        updateData('completedOrders', completedOrders);
+        if (!response.ok) throw new Error('Failed to start order');
         
-        // Buyurtmani asosiy ro'yxatdan o'chirish
-        orders.splice(orderIndex, 1);
-        updateData('orders', orders);
+        const updatedOrder = await response.json();
+        currentOrder = updatedOrder;
         
-        alert('Order marked as completed!');
-        loadOrders();
-        loadCompletedOrders();
-        updateDashboard();
-    }
-}
-
-// Buyurtmani o'chirish
-function deleteOrder(orderId) {
-    if (!checkAuth()) return;
-    
-    if (confirm('Are you sure you want to delete this order?')) {
-        const orders = getData('orders');
-        const updatedOrders = orders.filter(order => order.id != orderId);
-        updateData('orders', updatedOrders);
-        
-        alert('Order deleted successfully!');
-        loadOrders();
-        updateDashboard();
-    }
-}
-
-// Bajarilgan buyurtmalarni yuklash
-function loadCompletedOrders() {
-    if (!checkAuth()) return;
-    
-    const orders = getData('completedOrders');
-    const ordersTable = document.getElementById('completedTableBody');
-    
-    if (ordersTable) {
-        ordersTable.innerHTML = '';
-        
-        if (orders.length === 0) {
-            ordersTable.innerHTML = '<tr><td colspan="8" style="text-align: center;">No completed orders found</td></tr>';
-            return;
+        // Update in local orders array
+        const index = orders.findIndex(order => order.id === currentOrder.id);
+        if (index !== -1) {
+            orders[index] = currentOrder;
         }
         
-        orders.forEach(order => {
-            const row = document.createElement('tr');
-            
-            row.innerHTML = `
-                <td>#${order.id}</td>
-                <td>${order.clientName || 'N/A'}</td>
-                <td>${order.package || 'N/A'}</td>
-                <td>${order.clientWhatsApp || 'N/A'}</td>
-                <td>${order.clientEmail || 'N/A'}</td>
-                <td>${order.completedDate ? new Date(order.completedDate).toLocaleDateString() : 'N/A'}</td>
-                <td><span class="status status-completed">Completed</span></td>
-                <td>
-                    <button class="action-btn btn-view" data-id="${order.id}">View</button>
+        // Update UI
+        startOrderBtn.style.display = 'none';
+        completeOrderBtn.style.display = 'block';
+        timerContainer.style.display = 'block';
+        
+        // Start timer
+        startTimer();
+        
+        // Reload orders table
+        renderOrdersTable();
+        
+        showNotification('Order started successfully', 'success');
+    } catch (error) {
+        console.error('Error starting order:', error);
+        showNotification('Failed to start order', 'error');
+    }
+}
+
+// Complete order
+async function completeOrder() {
+    if (!currentOrder) return;
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${currentOrder.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                status: 'completed',
+                endTime: new Date().toISOString()
+            })
+        });
+        
+        if (!response.ok) throw new Error('Failed to complete order');
+        
+        const updatedOrder = await response.json();
+        currentOrder = updatedOrder;
+        
+        // Update in local orders array
+        const index = orders.findIndex(order => order.id === currentOrder.id);
+        if (index !== -1) {
+            orders[index] = currentOrder;
+        }
+        
+        // Stop timer
+        stopTimer();
+        
+        // Close modal
+        closeOrderDetailModal();
+        
+        // Reload all data
+        await loadAllData();
+        
+        showNotification('Order completed successfully', 'success');
+    } catch (error) {
+        console.error('Error completing order:', error);
+        showNotification('Failed to complete order', 'error');
+    }
+}
+
+// Delete order
+async function deleteOrder() {
+    if (!currentOrder) return;
+    
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/orders/${currentOrder.id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete order');
+        
+        // Remove from local orders array
+        orders = orders.filter(order => order.id !== currentOrder.id);
+        
+        // Close modal
+        closeOrderDetailModal();
+        
+        // Reload all data
+        await loadAllData();
+        
+        showNotification('Order deleted successfully', 'success');
+    } catch (error) {
+        console.error('Error deleting order:', error);
+        showNotification('Failed to delete order', 'error');
+    }
+}
+
+// Start timer
+function startTimer() {
+    if (!currentOrder.startTime) return;
+    
+    const startTime = new Date(currentOrder.startTime);
+    let elapsedTime = new Date() - startTime;
+    
+    // Update timer immediately
+    orderTimer.textContent = formatTime(elapsedTime);
+    
+    // Update timer every second
+    timerInterval = setInterval(() => {
+        elapsedTime += 1000;
+        orderTimer.textContent = formatTime(elapsedTime);
+    }, 1000);
+}
+
+// Stop timer
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+}
+
+// Format time (ms to HH:MM:SS)
+function formatTime(ms) {
+    const seconds = Math.floor(ms / 1000);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Close order detail modal
+function closeOrderDetailModal() {
+    orderDetailModal.classList.remove('active');
+    stopTimer();
+    currentOrder = null;
+}
+
+// Search orders
+function searchOrders() {
+    const searchTerm = searchInput.value.toLowerCase();
+    
+    if (!searchTerm) {
+        renderOrdersTable();
+        return;
+    }
+    
+    const filteredOrders = orders.filter(order => 
+        order.status !== 'completed' && (
+            order.name.toLowerCase().includes(searchTerm) ||
+            order.service.toLowerCase().includes(searchTerm) ||
+            order.id.toString().includes(searchTerm)
+        )
+    );
+    
+    ordersTableBody.innerHTML = '';
+    
+    if (filteredOrders.length === 0) {
+        ordersTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">
+                    No orders found matching "${searchTerm}"
                 </td>
-            `;
-            
-            ordersTable.appendChild(row);
-        });
-        
-        // Ko'rish tugmalariga hodisa qo'shish
-        document.querySelectorAll('.btn-view').forEach(btn => {
-            btn.addEventListener('click', function() {
-                viewCompletedOrderDetails(this.getAttribute('data-id'));
-            });
-        });
+            </tr>
+        `;
+        return;
     }
-}
-
-// Bajarilgan buyurtma tafsilotlarini ko'rsatish
-function viewCompletedOrderDetails(orderId) {
-    if (!checkAuth()) return;
     
-    const orders = getData('completedOrders');
-    const order = orders.find(order => order.id == orderId);
-    
-    if (order) {
-        const modal = document.getElementById('orderDetailsModal');
-        const content = document.getElementById('orderDetailsContent');
+    filteredOrders.forEach(order => {
+        const tr = document.createElement('tr');
         
-        content.innerHTML = `
-            <div class="detail-item">
-                <div class="detail-label">Order ID</div>
-                <div class="detail-value">#${order.id}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Client Name</div>
-                <div class="detail-value">${order.clientName || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Service Package</div>
-                <div class="detail-value">${order.package || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Contact Information</div>
-                <div class="contact-info-full">
-                    <div><i class="fas fa-phone"></i> ${order.clientWhatsApp || 'N/A'}</div>
-                    <div><i class="fas fa-envelope"></i> ${order.clientEmail || 'N/A'}</div>
-                </div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Order Date</div>
-                <div class="detail-value">${new Date(order.date).toLocaleDateString()}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Completed Date</div>
-                <div class="detail-value">${order.completedDate ? new Date(order.completedDate).toLocaleDateString() : 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Status</div>
-                <div class="detail-value"><span class="status status-completed">Completed</span></div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Additional Message</div>
-                <div class="detail-value">${order.clientMessage || 'No additional message'}</div>
-            </div>
+        const orderTime = new Date(order.orderTime);
+        const formattedTime = orderTime.toLocaleString();
+        
+        tr.innerHTML = `
+            <td>${order.id}</td>
+            <td>${order.name}</td>
+            <td>${order.service}</td>
+            <td>${formattedTime}</td>
+            <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+            <td>
+                <button class="action-btn btn-view" data-id="${order.id}">View</button>
+            </td>
         `;
         
-        modal.style.display = 'flex';
-    }
-}
-
-// Freelancerlarni yuklash
-function loadFreelancers() {
-    if (!checkAuth()) return;
+        ordersTableBody.appendChild(tr);
+    });
     
-    const freelancers = getData('freelancers');
-    const freelancersTable = document.getElementById('freelancersTableBody');
-    
-    if (freelancersTable) {
-        freelancersTable.innerHTML = '';
-        
-        if (freelancers.length === 0) {
-            freelancersTable.innerHTML = '<tr><td colspan="8" style="text-align: center;">No freelancers found</td></tr>';
-            return;
-        }
-        
-        freelancers.forEach(freelancer => {
-            const row = document.createElement('tr');
-            
-            row.innerHTML = `
-                <td>#F${freelancer.id}</td>
-                <td>${freelancer.freelancerName || 'N/A'}</td>
-                <td>${freelancer.freelancerCountry || 'N/A'}</td>
-                <td>${freelancer.freelancerWhatsApp || 'N/A'}</td>
-                <td>${freelancer.freelancerEmail || 'N/A'}</td>
-                <td>${freelancer.freelancerSpecialty || 'N/A'}</td>
-                <td>${new Date(freelancer.date).toLocaleDateString()}</td>
-                <td>
-                    <button class="action-btn btn-view" data-id="${freelancer.id}">View</button>
-                    <button class="action-btn btn-delete" data-id="${freelancer.id}">Delete</button>
-                </td>
-            `;
-            
-            freelancersTable.appendChild(row);
-        });
-        
-        // Harakatlar tugmalariga hodisa qo'shish
-        document.querySelectorAll('.btn-view').forEach(btn => {
-            btn.addEventListener('click', function() {
-                viewFreelancerDetails(this.getAttribute('data-id'));
-            });
-        });
-        
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', function() {
-                deleteFreelancer(this.getAttribute('data-id'));
-            });
-        });
-    }
-}
-
-// Freelancer tafsilotlarini ko'rsatish
-function viewFreelancerDetails(freelancerId) {
-    if (!checkAuth()) return;
-    
-    const freelancers = getData('freelancers');
-    const freelancer = freelancers.find(f => f.id == freelancerId);
-    
-    if (freelancer) {
-        const modal = document.getElementById('freelancerDetailsModal');
-        const content = document.getElementById('freelancerDetailsContent');
-        
-        content.innerHTML = `
-            <div class="detail-item">
-                <div class="detail-label">Freelancer ID</div>
-                <div class="detail-value">#F${freelancer.id}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Full Name</div>
-                <div class="detail-value">${freelancer.freelancerName || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Country</div>
-                <div class="detail-value">${freelancer.freelancerCountry || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Contact Information</div>
-                <div class="contact-info-full">
-                    <div><i class="fas fa-phone"></i> ${freelancer.freelancerWhatsApp || 'N/A'}</div>
-                    <div><i class="fas fa-envelope"></i> ${freelancer.freelancerEmail || 'N/A'}</div>
-                </div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Languages</div>
-                <div class="detail-value">${freelancer.freelancerLanguages || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Specialty</div>
-                <div class="detail-value">${freelancer.freelancerSpecialty || 'N/A'}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">Join Date</div>
-                <div class="detail-value">${new Date(freelancer.date).toLocaleDateString()}</div>
-            </div>
-            
-            <div class="detail-item">
-                <div class="detail-label">About</div>
-                <div class="detail-value">${freelancer.freelancerAbout || 'No information provided'}</div>
-            </div>
-        `;
-        
-        modal.style.display = 'flex';
-    }
-}
-
-// Freelancerni o'chirish
-function deleteFreelancer(freelancerId) {
-    if (!checkAuth()) return;
-    
-    if (confirm('Are you sure you want to delete this freelancer?')) {
-        const freelancers = getData('freelancers');
-        const updatedFreelancers = freelancers.filter(f => f.id != freelancerId);
-        updateData('freelancers', updatedFreelancers);
-        
-        alert('Freelancer deleted successfully!');
-        loadFreelancers();
-        updateDashboard();
-    }
-}
-
-// Qidiruv funksiyasi
-function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const searchTerm = this.value.toLowerCase();
-            const activeTab = document.querySelector('.tab-content.active').id;
-            
-            if (activeTab === 'orders') {
-                filterTable('ordersTableBody', searchTerm);
-            } else if (activeTab === 'completed') {
-                filterTable('completedTableBody', searchTerm);
-            } else if (activeTab === 'freelancers') {
-                filterTable('freelancersTableBody', searchTerm);
-            }
-        });
-    }
-}
-
-// Jadvalni filtrlash
-function filterTable(tableId, searchTerm) {
-    const table = document.getElementById(tableId);
-    const rows = table.getElementsByTagName('tr');
-    
-    for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName('td');
-        let found = false;
-        
-        for (let j = 0; j < cells.length; j++) {
-            const cellText = cells[j].textContent || cells[j].innerText;
-            if (cellText.toLowerCase().indexOf(searchTerm) > -1) {
-                found = true;
-                break;
-            }
-        }
-        
-        rows[i].style.display = found ? '' : 'none';
-    }
-}
-
-// Tab almashish
-function setupTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const tabId = button.getAttribute('data-tab');
-            
-            // Remove active class from all buttons and contents
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            
-            // Add active class to clicked button and corresponding content
-            button.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-            
-            // Load data for the active tab
-            if (tabId === 'orders') {
-                loadOrders();
-            } else if (tabId === 'completed') {
-                loadCompletedOrders();
-            } else if (tabId === 'freelancers') {
-                loadFreelancers();
-            }
+    // Add event listeners to view buttons
+    document.querySelectorAll('.btn-view').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const orderId = btn.getAttribute('data-id');
+            viewOrderDetails(orderId);
         });
     });
 }
 
-// Modalni yopish
-function setupModals() {
-    const modals = document.querySelectorAll('.modal');
-    const closeButtons = document.querySelectorAll('.close-modal');
+// Show notification
+function showNotification(message, type = 'info') {
+    const container = document.getElementById('notification-container');
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
     
-    closeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            modals.forEach(modal => {
-                modal.style.display = 'none';
-            });
-        });
-    });
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
     
-    window.addEventListener('click', (e) => {
-        modals.forEach(modal => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    });
+    notification.innerHTML = `
+        <i class="fas ${icons[type]} notification-icon"></i>
+        <div class="notification-content">
+            <div class="notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+            <div class="notification-message">${message}</div>
+        </div>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    // Hide notification after 5 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 5000);
 }
 
-// Sahifa yuklanganida ishga tushadigan funksiya
-function init() {
-    if (!checkAuth()) return;
-    
-    // Dastlabki ma'lumotlarni yuklash
-    updateDashboard();
-    loadOrders();
-    loadCompletedOrders();
-    loadFreelancers();
-    
-    // Tizimni sozlash
-    setupTabs();
-    setupSearch();
-    setupModals();
+// Show loading state
+function showLoading(loadingElement, contentElement) {
+    loadingElement.style.display = 'flex';
+    if (contentElement) {
+        contentElement.style.display = 'none';
+    }
 }
 
-// DOM kontent yuklanganida ishga tushirish
-document.addEventListener('DOMContentLoaded', init);
+// Hide loading state
+function hideLoading(loadingElement, contentElement) {
+    loadingElement.style.display = 'none';
+    if (contentElement) {
+        contentElement.style.display = 'table';
+    }
+}
+
+// Event Listeners
+loginForm.addEventListener('submit', handleLogin);
+logoutBtn.addEventListener('click', handleLogout);
+closeDetailModal.addEventListener('click', closeOrderDetailModal);
+startOrderBtn.addEventListener('click', startOrder);
+completeOrderBtn.addEventListener('click', completeOrder);
+deleteOrderBtn.addEventListener('click', deleteOrder);
+searchInput.addEventListener('input', searchOrders);
+refreshBtn.addEventListener('click', loadAllData);
+timeFilter.addEventListener('change', renderCompletedOrdersTable);
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+    if (e.target === orderDetailModal) {
+        closeOrderDetailModal();
+    }
+});
+
+// Close modal when pressing Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeOrderDetailModal();
+    }
+});
+
+// Initialize
+checkLoginStatus();
+
+// Set up periodic connection checking (every 30 seconds)
+setInterval(checkBackendConnection, 30000);
+```
