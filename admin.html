@@ -1,132 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Ruslon Toraboyev</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            padding: 20px;
-        }
-
-        .login-box {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-
-        .login-logo {
-            margin-bottom: 30px;
-        }
-
-        .login-logo img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #2575fc;
-        }
-
-        .login-box h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            outline: none;
-        }
-
-        .btn {
-            display: inline-block;
-            background: #2575fc;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        .btn:hover {
-            background: #1a5edc;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-box {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <div class="login-logo">
-                <img src="https://via.placeholder.com/80" alt="Admin Logo">
-            </div>
-            <h2>Admin Login</h2>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit" class="btn">Login</button>
-            </form>
-        </div>
-    </div>
+  <div class="login-box">
+    <h2>Admin Panelga kirish</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Foydalanuvchi nomi" required>
+      <input type="password" id="password" placeholder="Parol" required>
+      <button type="submit">Kirish</button>
+    </form>
+  </div>
 
-    <script>
-        const ADMIN_CREDENTIALS = {
-            username: 'truslon',
-            password: 'ruslonbek11'
-        };
+  <script>
+    const ADMIN_CREDENTIALS = {
+      username: 'truslon',
+      password: 'ruslonbek11'
+    };
 
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
 
-            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-                alert('Login successful! Redirecting to admin panel...');
-                window.location.href = "index.html"; // Admin panel sahifasiga yo'naltirish
-            } else {
-                alert('Invalid username or password!');
-            }
-        });
-    </script>
+      if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        localStorage.setItem("isAdminLoggedIn", "true"); // login session saqlash
+        alert('Login muvaffaqiyatli!');
+        window.location.href = "admin/index.html"; // Admin panelga yo'naltirish
+      } else {
+        alert('Xato: Login yoki parol noto‘g‘ri!');
+      }
+    });
+  </script>
 </body>
 </html>
