@@ -12,8 +12,10 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Static files - To'g'ri yo'llar bilan
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
+// Frontend fayllarini ulash (agar kerak bo'lsa)
+app.use(express.static(path.join(__dirname, "../frontend")));
+app.use("/admin", express.static(path.join(__dirname, "../admin")));
+
 
 // Admin paneli uchun static fayllar - To'g'ri yo'l bilan
 app.use('/admin', express.static(path.join(__dirname, '..', 'admin'), {
@@ -77,7 +79,11 @@ function generateId() {
 // Ensure data files exist on startup
 ensureDataFiles();
 
-// API Routes
+// API Routes 
+// Routes
+const ordersRoute = require("./routes/orders");
+app.use("/api/orders", ordersRoute);
+
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

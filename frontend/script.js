@@ -156,9 +156,6 @@ const typingElement = document.querySelector('.typing-effect');
 const formLoading = document.getElementById('form-loading');
 const submitOrderBtn = document.getElementById('submit-order-btn');
 
-// Backend connection status
-let isBackendOnline = false;
-
 // Typing Animation
 const typingTexts = ['Freelance Services', 'Web Design', '3D Modeling', 'Translation'];
 let textIndex = 0;
@@ -289,51 +286,6 @@ function showNotification(message, type = 'success') {
     }, 5000);
 }
 
-// Update connection status
-function updateConnectionStatus(online) {
-    isBackendOnline = online;
-    
-    // Create or update connection status element
-    let statusElement = document.querySelector('.connection-status');
-    if (!statusElement) {
-        statusElement = document.createElement('div');
-        statusElement.className = 'connection-status';
-        document.body.appendChild(statusElement);
-    }
-    
-    if (online) {
-        statusElement.className = 'connection-status online';
-        statusElement.innerHTML = `<span class="status-dot"></span> ${translations[currentLang].connectionOnline}`;
-    } else {
-        statusElement.className = 'connection-status offline';
-        statusElement.innerHTML = `<span class="status-dot"></span> ${translations[currentLang].connectionOffline}`;
-    }
-}
-
-// Check backend connection
-async function checkBackendConnection() {
-    try {
-        const response = await fetch('/api/orders', {
-            method: 'HEAD',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            updateConnectionStatus(true);
-            return true;
-        } else {
-            updateConnectionStatus(false);
-            return false;
-        }
-    } catch (error) {
-        console.error('Backend connection failed:', error);
-        updateConnectionStatus(false);
-        return false;
-    }
-}
-
 // Form validation
 function validateForm() {
     let isValid = true;
@@ -381,7 +333,7 @@ async function handleOrderSubmit(e) {
     
     // Validate form
     if (!validateForm()) {
-        showNotification(translations[currentLang].error + ' ' + 'Please fill all required fields correctly.', 'error');
+        showNotification('Please fill all required fields correctly.', 'error');
         return;
     }
     
@@ -393,18 +345,12 @@ async function handleOrderSubmit(e) {
     const service = serviceInput.value;
     
     // Show loading, hide submit button
-    formLoading.style.display = 'block';
-    submitOrderBtn.style.display = 'none';
-    submitOrderBtn.classList.add('loading');
+    if (formLoading && submitOrderBtn) {
+        formLoading.style.display = 'block';
+        submitOrderBtn.style.display = 'none';
+    }
     
     try {
-        // Check backend connection first
-        const isConnected = await checkBackendConnection();
-        
-        if (!isConnected) {
-            throw new Error('Backend connection failed. Please try again later.');
-        }
-        
         // Backendga so'rov yuborish
         const response = await fetch('/api/orders', {
             method: 'POST',
@@ -431,15 +377,20 @@ async function handleOrderSubmit(e) {
             throw new Error(data.error);
         }
         
+        // LocalStorage ga ham saqlaymiz (backup sifatida)
+        saveOrderToLocalStorage(name, whatsapp, email, service, details);
+        
         // Show success notification
-        showNotification(translations[currentLang].successMessage, 'success');
+        showNotification('Order submitted successfully!', 'success');
         
         // Close order modal and show success modal
-        orderModal.classList.remove('active');
+        closeModals();
         
         // Set order time
         const now = new Date();
-        orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        if (orderTime) {
+            orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        }
         
         // Show success modal
         successModal.classList.add('active');
@@ -449,49 +400,99 @@ async function handleOrderSubmit(e) {
         
     } catch (error) {
         console.error('Error:', error);
-        showNotification(translations[currentLang].error + ' ' + error.message, 'error');
+        
+        // Agar backend ishlamasa, faqat localStorage ga saqlaymiz
+        saveOrderToLocalStorage(name, whatsapp, email, service, details);
+        
+        showNotification('Order saved locally. We will contact you soon!', 'warning');
+        
+        // Close order modal and show success modal
+        closeModals();
+        
+        // Set order time
+        const now = new Date();
+        if (orderTime) {
+            orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        }
+        
+        // Show success modal
+        successModal.classList.add('active');
+        
+        // Reset form
+        orderForm.reset();
     } finally {
         // Hide loading, show submit button
-        formLoading.style.display = 'none';
-        submitOrderBtn.style.display = 'block';
-        submitOrderBtn.classList.remove('loading');
+        if (formLoading && submitOrderBtn) {
+            formLoading.style.display = 'none';
+            submitOrderBtn.style.display = 'block';
+        }
     }
 }
 
-// Create admin link
-function createAdminLink() {
-    const adminLink = document.createElement('a');
-    adminLink.href = '/admin';
-    adminLink.className = 'admin-link';
-    adminLink.innerHTML = '<i class="fas fa-cog"></i> Admin Panel';
-    adminLink.title = 'Admin paneliga kirish';
-    
-    document.body.appendChild(adminLink);
+// LocalStorage ga buyurtma saqlash
+function saveOrderToLocalStorage(name, whatsapp, email, service, details) {
+    try {
+        // Get existing orders from localStorage
+        const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
+        
+        // Create new order
+        const newOrder = {
+            id: Date.now(),
+            name,
+            whatsapp,
+            email,
+            service,
+            details,
+            orderTime: new Date().toISOString(),
+            status: 'pending'
+        };
+        
+        // Add to orders array
+        existingOrders.push(newOrder);
+        
+        // Save to localStorage
+        localStorage.setItem('orders', JSON.stringify(existingOrders));
+        
+        console.log('Order saved to localStorage:', newOrder);
+        return true;
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+        return false;
+    }
 }
 
-// Initialize connection status check
-async function initializeApp() {
-    // Check backend connection on load
-    await checkBackendConnection();
-    
-    // Set up periodic connection checking (every 30 seconds)
-    setInterval(checkBackendConnection, 30000);
-    
-    // Create admin link
-    createAdminLink();
-    
-    // Initialize typing animation and scroll check
-    type();
-    checkScroll();
+// Service demand tracking
+function trackServiceDemand(serviceName) {
+    try {
+        const demandData = JSON.parse(localStorage.getItem('serviceDemand')) || {};
+        demandData[serviceName] = (demandData[serviceName] || 0) + 1;
+        localStorage.setItem('serviceDemand', JSON.stringify(demandData));
+        
+        // Backendga ham yuborish (agar ulanish bo'lsa)
+        fetch('/api/service-demand', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                service: serviceName,
+                timestamp: new Date().toISOString()
+            })
+        }).catch(error => console.error('Failed to track service demand:', error));
+    } catch (error) {
+        console.error('Error tracking service demand:', error);
+    }
 }
 
 // Event Listeners
 window.addEventListener('scroll', checkScroll);
-window.addEventListener('load', initializeApp);
+window.addEventListener('load', checkScroll);
 
-hamburger.addEventListener('click', () => {
-    navMenu.classList.toggle('active');
-});
+if (hamburger) {
+    hamburger.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
+}
 
 // Close mobile menu when clicking on links
 document.querySelectorAll('nav a').forEach(link => {
@@ -500,22 +501,34 @@ document.querySelectorAll('nav a').forEach(link => {
     });
 });
 
-languageBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        changeLanguage(btn.dataset.lang);
+if (languageBtns.length > 0) {
+    languageBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            changeLanguage(btn.dataset.lang);
+        });
     });
-});
+}
 
-orderBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        openOrderModal(btn.dataset.service);
+if (orderBtns.length > 0) {
+    orderBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            openOrderModal(btn.dataset.service);
+            trackServiceDemand(btn.dataset.service);
+        });
     });
-});
+}
 
-closeOrderModal.addEventListener('click', closeModals);
-closeSuccessModal.addEventListener('click', closeModals);
+if (closeOrderModal) {
+    closeOrderModal.addEventListener('click', closeModals);
+}
 
-orderForm.addEventListener('submit', handleOrderSubmit);
+if (closeSuccessModal) {
+    closeSuccessModal.addEventListener('click', closeModals);
+}
+
+if (orderForm) {
+    orderForm.addEventListener('submit', handleOrderSubmit);
+}
 
 // Close modal when clicking outside
 document.addEventListener('click', (e) => {
@@ -532,142 +545,59 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Real-time form validation
-document.querySelectorAll('#order-form input, #order-form textarea').forEach(input => {
-    input.addEventListener('blur', () => {
-        validateForm();
-    });
-    
-    input.addEventListener('input', () => {
-        // Remove error state when user starts typing
-        if (input.value.trim()) {
-            input.parentElement.classList.remove('error');
-        }
-    });
-});
-
-// Service demand tracking
-function trackServiceDemand(serviceName) {
-    // Local storage ga xizmatlar talabini saqlash
-    try {
-        const demandData = JSON.parse(localStorage.getItem('serviceDemand')) || {};
-        demandData[serviceName] = (demandData[serviceName] || 0) + 1;
-        localStorage.setItem('serviceDemand', JSON.stringify(demandData));
-        
-        // Backendga ham yuborish (agar ulanish bo'lsa)
-        if (isBackendOnline) {
-            fetch('/api/service-demand', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    service: serviceName,
-                    timestamp: new Date().toISOString()
-                })
-            }).catch(error => console.error('Failed to track service demand:', error));
-        }
-    } catch (error) {
-        console.error('Error tracking service demand:', error);
-    }
-}
-
-// Order tugmalariga track qilish funksiyasini qo'shish
-orderBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        trackServiceDemand(btn.dataset.service);
-    });
-});
-
-// SEO enhancement - Update page title dynamically
-function updatePageTitle() {
-    const sectionTitles = {
-        '#home': 'Professional Freelancer Services',
-        '#services': 'Services - Professional Freelancer',
-        '#about': 'About Me - Professional Freelancer',
-        '#portfolio': 'Portfolio - Completed Projects',
-        '#contact': 'Contact - Get In Touch'
-    };
-    
-    // Update title when hash changes
-    window.addEventListener('hashchange', () => {
-        const newTitle = sectionTitles[window.location.hash] || 'Professional Freelancer Services';
-        document.title = newTitle + ' | Ruslon Toraboyev';
-    });
-}
-
-// Initialize SEO title updates
-updatePageTitle();
-
-// Performance optimization - Lazy loading for images
-function initializeLazyLoading() {
-    const lazyImages = document.querySelectorAll('img[data-src]');
-    
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
-                }
-            });
+if (orderForm) {
+    orderForm.querySelectorAll('input, textarea').forEach(input => {
+        input.addEventListener('blur', () => {
+            validateForm();
         });
         
-        lazyImages.forEach(img => imageObserver.observe(img));
+        input.addEventListener('input', () => {
+            // Remove error state when user starts typing
+            if (input.value.trim()) {
+                input.parentElement.classList.remove('error');
+            }
+        });
+    });
+}
+document.getElementById("order-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const product = document.getElementById("product").value.trim();
+
+  if (!name || !phone || !product) {
+    document.getElementById("message").textContent = "❌ Barcha maydonlarni to‘ldiring!";
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, phone, product })
+    });
+
+    if (response.ok) {
+      document.getElementById("message").textContent = "✅ Buyurtma yuborildi!";
+      document.getElementById("order-form").reset();
     } else {
-        // Fallback for browsers without IntersectionObserver
-        lazyImages.forEach(img => {
-            img.src = img.dataset.src;
-        });
+      document.getElementById("message").textContent = "❌ Xatolik yuz berdi!";
     }
-}
+  } catch (error) {
+    console.error("Xatolik:", error);
+    document.getElementById("message").textContent = "❌ Server ishlamayapti!";
+  }
+});
 
-// Initialize lazy loading
-initializeLazyLoading();
+// Initialize
+type();
+checkScroll();
+
+// Check if there are any orders in localStorage on page load
+window.addEventListener('load', () => {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    console.log('Orders in localStorage:', orders.length);
+});
 ```
-// Buyurtma yuborilganda localStoragega saqlash
-function handleOrderSubmit(e) {
-    e.preventDefault();
-    
-    // Get form values
-    const name = document.getElementById('name').value;
-    const whatsapp = document.getElementById('whatsapp').value;
-    const email = document.getElementById('email').value;
-    const details = document.getElementById('details').value;
-    const service = serviceInput.value;
-    
-    // Get existing orders from localStorage
-    const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
-    
-    // Create new order
-    const newOrder = {
-        id: Date.now(),
-        name,
-        whatsapp,
-        email,
-        service,
-        details,
-        orderTime: new Date().toISOString(),
-        status: 'pending'
-    };
-    
-    // Add to orders array
-    existingOrders.push(newOrder);
-    
-    // Save to localStorage
-    localStorage.setItem('orders', JSON.stringify(existingOrders));
-    
-    // Close order modal and show success modal
-    orderModal.classList.remove('active');
-    
-    // Set order time
-    const now = new Date();
-    orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-    
-    // Show success modal
-    successModal.classList.add('active');
-    
-    // Reset form
-    orderForm.reset();
-}
+

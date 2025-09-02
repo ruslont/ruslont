@@ -2,170 +2,28 @@
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - Freelancer Services</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Login tekshiruv -->
-  <script>
-    if (localStorage.getItem("loggedIn") !== "true") {
-      window.location.href = "login.html";
-    }
-  </script>
-<h2>Buyurtmalar</h2>
-<div id="orders"></div>
-
-<h2>Freelancerlar</h2>
-<div id="freelancers"></div>
-
-<h2>Bajarilgan buyurtmalar</h2>
-<div id="completed"></div>
-
-<script src="script.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #1f2937;
-    }
-    header {
-      background: #2563eb;
-      color: white;
-      padding: 1rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header h1 {
-      font-size: 1.3rem;
-    }
-    header button {
-      background: #ef4444;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      color: #fff;
-      cursor: pointer;
-    }
-    main {
-      padding: 2rem;
-    }
-    .card {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
-    }
-    .order-item {
-      border-bottom: 1px solid #ddd;
-      padding: 10px 0;
-    }
-    .order-item:last-child {
-      border: none;
-    }
-    .order-item strong {
-      display: inline-block;
-      width: 100px;
-    }
-    footer {
-      background: #1f2937;
-      color: white;
-      text-align: center;
-      padding: 1rem;
-    }
-  </style>
+  <title>Admin Panel - Buyurtmalar</title>
+  <link rel="stylesheet" href="admin-style.css">
 </head>
 <body>
-  <div class="admin-container">
-    <header>
-      <h1>Admin Panel</h1>
-      <button onclick="logout()">Chiqish</button>
-    </header>
-
-    <main>
-      <div class="card">
-        <h2>Buyurtmalar ro‘yxati</h2>
-        <div id="orders">Yuklanmoqda...</div>
-      </div>
-
-      <div class="card">
-        <h2>Xizmatlarga talab</h2>
-        <div id="serviceDemand">Yuklanmoqda...</div>
-      </div>
-    </main>
-
-    <footer>
-      <p>&copy; 2025 Freelancer Services Admin</p>
-    </footer>
+  <div class="container">
+    <h1>Buyurtmalar ro'yxati</h1>
+    <table id="orders-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Mijoz</th>
+          <th>Telefon</th>
+          <th>Buyurtma</th>
+          <th>Sana</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- script.js orqali avtomatik to'ldiriladi -->
+      </tbody>
+    </table>
   </div>
 
-  <script>
-    function logout() {
-      localStorage.removeItem("loggedIn");
-      window.location.href = "login.html";
-    }
-
-    // Buyurtmalarni chiqarish
-    async function loadOrders() {
-      try {
-        const res = await fetch("../data/orders.json");
-        const orders = await res.json();
-
-        if (!orders || orders.length === 0) {
-          document.getElementById("orders").innerHTML = "<p>Hozircha buyurtmalar yo‘q.</p>";
-          return;
-        }
-
-        let html = "";
-        orders.forEach((order, i) => {
-          html += `
-            <div class="order-item">
-              <p><strong>#${i+1}</strong></p>
-              <p><strong>Ism:</strong> ${order.name}</p>
-              <p><strong>Telefon:</strong> ${order.phone}</p>
-              <p><strong>Xizmat:</strong> ${order.service}</p>
-              <p><strong>Izoh:</strong> ${order.message || "-"}</p>
-              <p><strong>Sana:</strong> ${order.date || "-"}</p>
-            </div>
-          `;
-        });
-
-        document.getElementById("orders").innerHTML = html;
-      } catch (err) {
-        document.getElementById("orders").innerHTML = "<p style='color:red;'>Buyurtmalarni yuklab bo‘lmadi!</p>";
-        console.error(err);
-      }
-    }
-
-    // Xizmatlarga talabni chiqarish
-    async function loadDemand() {
-      try {
-        const res = await fetch("../data/serviceDemand.json");
-        const demand = await res.json();
-
-        if (!demand || Object.keys(demand).length === 0) {
-          document.getElementById("serviceDemand").innerHTML = "<p>Hozircha ma’lumot yo‘q.</p>";
-          return;
-        }
-
-        let html = "<ul>";
-        for (let service in demand) {
-          html += `<li><strong>${service}:</strong> ${demand[service]} ta buyurtma</li>`;
-        }
-        html += "</ul>";
-
-        document.getElementById("serviceDemand").innerHTML = html;
-      } catch (err) {
-        document.getElementById("serviceDemand").innerHTML = "<p style='color:red;'>Talablarni yuklab bo‘lmadi!</p>";
-        console.error(err);
-      }
-    }
-
-    loadOrders();
-    loadDemand();
-  </script>
+  <script src="admin-script.js"></script>
 </body>
 </html>
