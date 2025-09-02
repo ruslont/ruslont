@@ -1,145 +1,134 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const bodyParser = require('body-parser');
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
+app.use(express.json());
+
+// === Statik yo‘llar ===
+// Frontend (mijozlar sayti)
+app.use("/", express.static(path.join(__dirname, "..", "frontend")));
+
+// Admin panel
+app.use("/admin", express.static(path.join(__dirname, "..", "admin")));
+
+// === Data papkasi ===
+const dataDir = path.join(__dirname, "..", "data");
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
+}
+
+// === Fayllar ===
+const ordersFile = path.join(dataDir, "orders.json");
+const freelancersFile = path.join(dataDir, "freelancers.json");
+const completedFile = path.join(dataDir, "completed.json");
+
+// === Helper: JSON o‘qish/yozish ===
+function readJSON(file) {
+    if (!fs.existsSync(file)) return [];
+    return JSON.parse(fs.readFileSync(file));
+}
+function writeJSON(file, data) {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+// === BUYURTMALAR ===
+
+// Buyurtma yuborish (mijoz tomonidan)
+app.post("/api/orders", (req, res) => {
+    const { clientName, clientWhatsApp, clientEmail, clientMessage, package } = req.body;
+
+    if (!clientName || !clientWhatsApp || !clientEmail || !package) {
+        return res.status(400).json({ success: false, message: "Barcha maydonlarni to‘ldiring" });
+    }
+
+    let orders = readJSON(ordersFile);
+    const newOrder = {
+        id: orders.length + 1,
+        clientName,
+        clientWhatsApp,
+        clientEmail,
+        clientMessage,
+        package,
+        status: "pending",
+        date: new Date().toISOString()
+    };
+
+    orders.push(newOrder);
+    writeJSON(ordersFile, orders);
+
+    res.json({ success: true, message: "Buyurtma yuborildi", order: newOrder });
+});
+
+// Admin buyurtmalarni ko‘rishi
+app.get("/api/admin/orders", (req, res) => {
+    res.json({ success: true, orders: readJSON(ordersFile) });
+});
+
+// === FREELANCERLAR ===
+
+// Freelancer qo‘shish
+app.post("/api/freelancers", (req, res) => {
+    const { name, skills, contact } = req.body;
+    if (!name || !skills || !contact) {
+        return res.status(400).json({ success: false, message: "Barcha maydonlarni to‘ldiring" });
+    }
+
+    let freelancers = readJSON(freelancersFile);
+    const newFreelancer = {
+        id: freelancers.length + 1,
+        name,
+        skills,
+        contact,
+        joined: new Date().toISOString()
+    };
+
+    freelancers.push(newFreelancer);
+    writeJSON(freelancersFile, freelancers);
+
+    res.json({ success: true, message: "Freelancer qo‘shildi", freelancer: newFreelancer });
+});
+
+// Admin freelancerlarni ko‘rishi
+app.get("/api/admin/freelancers", (req, res) => {
+    res.json({ success: true, freelancers: readJSON(freelancersFile) });
+});
+
+// === BAJARILGAN BUYURTMALAR ===
+
+// Buyurtmani bajarilgan deb belgilash
+app.post("/api/completed", (req, res) => {
+    const { orderId } = req.body;
+    if (!orderId) {
+        return res.status(400).json({ success: false, message: "orderId kerak" });
+    }
+
+    let orders = readJSON(ordersFile);
+    let completed = readJSON(completedFile);
+
+    const order = orders.find(o => o.id === orderId);
+    if (!order) {
+        return res.status(404).json({ success: false, message: "Buyurtma topilmadi" });
+    }
+
+    // Statusni o‘zgartirish
+    order.status = "completed";
+    completed.push(order);
+
+    // Yozib qo‘yish
+    writeJSON(completedFile, completed);
+    writeJSON(ordersFile, orders);
+
+    res.json({ success: true, message: "Buyurtma bajarildi", order });
+});
+
+// Admin bajarilgan buyurtmalarni ko‘rishi
+app.get("/api/admin/completed", (req, res) => {
+    res.json({ success: true, completed: readJSON(completedFile) });
+});
+
+// === SERVERNI ISHGA TUSHIRISH ===
 const PORT = process.env.PORT || 3000;
-
-// Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Static fayllarni ulash (frontend va admin uchun)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Ma'lumotlar uchun massivlar
-let orders = [];
-let freelancers = [];
-let completedOrders = [];
-
-// Data papkasi
-const dataDir = path.join(__dirname, 'data');
-
-// Ma'lumotlarni yuklash
-function loadData() {
-    try {
-        if (fs.existsSync(path.join(dataDir, 'orders.json'))) {
-            orders = JSON.parse(fs.readFileSync(path.join(dataDir, 'orders.json'), 'utf8'));
-        }
-        if (fs.existsSync(path.join(dataDir, 'freelancers.json'))) {
-            freelancers = JSON.parse(fs.readFileSync(path.join(dataDir, 'freelancers.json'), 'utf8'));
-        }
-        if (fs.existsSync(path.join(dataDir, 'completedOrders.json'))) {
-            completedOrders = JSON.parse(fs.readFileSync(path.join(dataDir, 'completedOrders.json'), 'utf8'));
-        }
-    } catch (error) {
-        console.log("Ma'lumotlarni yuklashda xato:", error.message);
-    }
-}
-
-// Ma'lumotlarni saqlash
-function saveData() {
-    try {
-        if (!fs.existsSync(dataDir)) {
-            fs.mkdirSync(dataDir);
-        }
-        fs.writeFileSync(path.join(dataDir, 'orders.json'), JSON.stringify(orders, null, 2));
-        fs.writeFileSync(path.join(dataDir, 'freelancers.json'), JSON.stringify(freelancers, null, 2));
-        fs.writeFileSync(path.join(dataDir, 'completedOrders.json'), JSON.stringify(completedOrders, null, 2));
-    } catch (error) {
-        console.error("Ma'lumotlarni saqlashda xato:", error.message);
-    }
-}
-
-// Root sahifa
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Admin sahifasi
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html'));
-});
-
-// Buyurtma qabul qilish
-app.post('/api/order', (req, res) => {
-    try {
-        const { clientName, clientWhatsApp, clientEmail, clientMessage, package: packageName } = req.body;
-
-        const newOrder = {
-            id: Date.now(),
-            clientName,
-            clientWhatsApp,
-            clientEmail,
-            clientMessage: clientMessage || '',
-            package: packageName,
-            status: 'pending',
-            date: new Date().toISOString()
-        };
-
-        orders.push(newOrder);
-        saveData();
-
-        res.json({
-            success: true,
-            message: "Buyurtma qabul qilindi! Tez orada siz bilan bog'lanamiz.",
-            orderId: newOrder.id
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server xatosi: " + error.message });
-    }
-});
-
-// Freelancer a'zo bo'lish
-app.post('/api/freelancer', (req, res) => {
-    try {
-        const { freelancerName, freelancerCountry, freelancerWhatsApp, freelancerEmail, freelancerLanguages, freelancerSpecialty, freelancerAbout } = req.body;
-
-        const newFreelancer = {
-            id: Date.now(),
-            freelancerName,
-            freelancerCountry,
-            freelancerWhatsApp,
-            freelancerEmail,
-            freelancerLanguages,
-            freelancerSpecialty,
-            freelancerAbout: freelancerAbout || '',
-            date: new Date().toISOString(),
-            status: 'new'
-        };
-
-        freelancers.push(newFreelancer);
-        saveData();
-
-        res.json({
-            success: true,
-            message: "Arizangiz qabul qilindi! Tez orada siz bilan bog'lanamiz.",
-            freelancerId: newFreelancer.id
-        });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Server xatosi: " + error.message });
-    }
-});
-
-// Admin API - Barcha buyurtmalar
-app.get('/api/admin/orders', (req, res) => {
-    res.json({ success: true, orders });
-});
-
-// Admin API - Barcha freelancerlar
-app.get('/api/admin/freelancers', (req, res) => {
-    res.json({ success: true, freelancers });
-});
-
-// Admin API - Bajarilgan buyurtmalar
-app.get('/api/admin/completed-orders', (req, res) => {
-    res.json({ success: true, completedOrders });
-});
-
-// Serverni ishga tushirishdan oldin data yuklash
-loadData();
-
 app.listen(PORT, () => {
-    console.log(`✅ Server http://localhost:${PORT} da ishlayapti`);
+    console.log(`✅ Server http://localhost:${PORT} da ishlamoqda`);
 });
