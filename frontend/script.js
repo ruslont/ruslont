@@ -1,3 +1,46 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Eski kodlaringiz shu yerda tursin
+    console.log("Frontend script yuklandi ✅");
+
+    const orderForm = document.getElementById('orderForm');
+
+    if (orderForm) {
+        orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Forma qiymatlarini olish
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const service = document.getElementById('service').value.trim();
+            const date = document.getElementById('date').value.trim();
+
+            const order = { name, phone, service, date };
+
+            try {
+                // 🚀 Yangi qism: buyurtmani serverga yuborish
+                const response = await fetch('http://localhost:3000/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(order)
+                });
+
+                const result = await response.json();
+                alert(result.message || "Buyurtma yuborildi ✅");
+
+                // Forma tozalash
+                orderForm.reset();
+            } catch (error) {
+                console.error('❌ Buyurtma yuborishda xatolik:', error);
+                alert('Buyurtma yuborishda muammo yuz berdi.');
+            }
+        });
+    }
+
+    // Agar boshqa eski funksiyalar bo‘lsa, ular shu yerda turadi
+});
+  
 // Language Data
 const translations = {
     en: {
