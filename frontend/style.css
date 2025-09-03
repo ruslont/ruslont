@@ -335,6 +335,68 @@ nav ul li a:hover::after {
     left: 0;
     color: var(--primary);
 }
+/* Error message styles */
+.form-group.error input,
+.form-group.error textarea {
+    border-color: #ef4444;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+/* WhatsApp button styles */
+.btn-whatsapp {
+    background-color: #25D366;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-whatsapp:hover {
+    background-color: #128C7E;
+}
+
+/* Notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification.success {
+    background-color: #10b981;
+    border-left: 4px solid #059669;
+}
+
+.notification.error {
+    background-color: #ef4444;
+    border-left: 4px solid #dc2626;
+}
+
+.notification.warning {
+    background-color: #f59e0b;
+    border-left: 4px solid #d97706;
+}
 
 /* Portfolio Section */
 .portfolio-grid {

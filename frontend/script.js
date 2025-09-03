@@ -1,46 +1,3 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Eski kodlaringiz shu yerda tursin
-    console.log("Frontend script yuklandi ✅");
-
-    const orderForm = document.getElementById('orderForm');
-
-    if (orderForm) {
-        orderForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // Forma qiymatlarini olish
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const service = document.getElementById('service').value.trim();
-            const date = document.getElementById('date').value.trim();
-
-            const order = { name, phone, service, date };
-
-            try {
-                // 🚀 Yangi qism: buyurtmani serverga yuborish
-                const response = await fetch('http://localhost:3000/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(order)
-                });
-
-                const result = await response.json();
-                alert(result.message || "Buyurtma yuborildi ✅");
-
-                // Forma tozalash
-                orderForm.reset();
-            } catch (error) {
-                console.error('❌ Buyurtma yuborishda xatolik:', error);
-                alert('Buyurtma yuborishda muammo yuz berdi.');
-            }
-        });
-    }
-
-    // Agar boshqa eski funksiyalar bo‘lsa, ular shu yerda turadi
-});
-  
 // Language Data
 const translations = {
     en: {
@@ -100,7 +57,7 @@ const translations = {
         detailsLabel: "Project Details",
         submitOrder: "Submit Order",
         successTitle: "Thank You!",
-        successMessage: "Thank you for your order. Ruslon Toraboyev will contact you shortly.",
+        successMessage: "Thank you for your order. I will contact you shortly on WhatsApp.",
         orderTime: "Order time:",
         closeBtn: "Close",
         loading: "Loading...",
@@ -108,7 +65,10 @@ const translations = {
         error: "Error!",
         connectionOnline: "Online",
         connectionOffline: "Offline",
-        retry: "Try Again"
+        retry: "Try Again",
+        validationRequired: "Please fill in this field",
+        validationEmail: "Please enter a valid email address",
+        validationWhatsApp: "Please enter a valid WhatsApp number"
     },
     ru: {
         home: "Главная",
@@ -167,7 +127,7 @@ const translations = {
         detailsLabel: "Детали Проекта",
         submitOrder: "Отправить Заказ",
         successTitle: "Спасибо!",
-        successMessage: "Спасибо за ваш заказ. Руслон Торабоев свяжется с вами в ближайшее время.",
+        successMessage: "Спасибо за ваш заказ. Я свяжусь с вами в ближайшее время через WhatsApp.",
         orderTime: "Время заказа:",
         closeBtn: "Закрыть",
         loading: "Загрузка...",
@@ -175,7 +135,10 @@ const translations = {
         error: "Ошибка!",
         connectionOnline: "Онлайн",
         connectionOffline: "Оффлайн",
-        retry: "Попробовать снова"
+        retry: "Попробовать снова",
+        validationRequired: "Пожалуйста, заполните это поле",
+        validationEmail: "Пожалуйста, введите действительный адрес электронной почты",
+        validationWhatsApp: "Пожалуйста, введите действительный номер WhatsApp"
     }
 };
 
@@ -198,6 +161,12 @@ const orderTime = document.getElementById('order-time');
 const typingElement = document.querySelector('.typing-effect');
 const formLoading = document.getElementById('form-loading');
 const submitOrderBtn = document.getElementById('submit-order-btn');
+
+// Form elements
+const nameInput = document.getElementById('name');
+const whatsappInput = document.getElementById('whatsapp');
+const emailInput = document.getElementById('email');
+const detailsInput = document.getElementById('details');
 
 // Typing Animation
 const typingTexts = ['Freelance Services', 'Web Design', '3D Modeling', 'Translation'];
@@ -308,8 +277,15 @@ function showNotification(message, type = 'success') {
     // Create new notification
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+    
     notification.innerHTML = `
-        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'}"></i>
+        <i class="fas ${icons[type] || 'fa-info-circle'}"></i>
         <span>${message}</span>
     `;
     
@@ -336,41 +312,73 @@ function validateForm() {
     // Reset all error states
     document.querySelectorAll('.form-group').forEach(group => {
         group.classList.remove('error');
+        const errorElement = group.querySelector('.error-message');
+        if (errorElement) {
+            errorElement.remove();
+        }
     });
     
     // Validate name
-    const name = document.getElementById('name').value.trim();
+    const name = nameInput.value.trim();
     if (!name) {
-        document.querySelector('[for="name"]').parentElement.classList.add('error');
+        showFieldError(nameInput, translations[currentLang].validationRequired);
         isValid = false;
     }
     
     // Validate WhatsApp
-    const whatsapp = document.getElementById('whatsapp').value.trim();
+    const whatsapp = whatsappInput.value.trim();
     if (!whatsapp) {
-        document.querySelector('[for="whatsapp"]').parentElement.classList.add('error');
+        showFieldError(whatsappInput, translations[currentLang].validationWhatsApp);
+        isValid = false;
+    } else if (!isValidWhatsApp(whatsapp)) {
+        showFieldError(whatsappInput, translations[currentLang].validationWhatsApp);
         isValid = false;
     }
     
     // Validate email
-    const email = document.getElementById('email').value.trim();
+    const email = emailInput.value.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
-        document.querySelector('[for="email"]').parentElement.classList.add('error');
+    if (!email) {
+        showFieldError(emailInput, translations[currentLang].validationRequired);
+        isValid = false;
+    } else if (!emailRegex.test(email)) {
+        showFieldError(emailInput, translations[currentLang].validationEmail);
         isValid = false;
     }
     
     // Validate details
-    const details = document.getElementById('details').value.trim();
+    const details = detailsInput.value.trim();
     if (!details) {
-        document.querySelector('[for="details"]').parentElement.classList.add('error');
+        showFieldError(detailsInput, translations[currentLang].validationRequired);
         isValid = false;
     }
     
     return isValid;
 }
 
-// Form Submission (backend bilan ishlaydigan versiya)
+// Show field error
+function showFieldError(input, message) {
+    const formGroup = input.closest('.form-group');
+    formGroup.classList.add('error');
+    
+    const errorElement = document.createElement('div');
+    errorElement.className = 'error-message';
+    errorElement.textContent = message;
+    errorElement.style.color = '#ef4444';
+    errorElement.style.fontSize = '0.875rem';
+    errorElement.style.marginTop = '0.5rem';
+    
+    formGroup.appendChild(errorElement);
+}
+
+// Validate WhatsApp number
+function isValidWhatsApp(number) {
+    // Basic validation for WhatsApp numbers
+    const whatsappRegex = /^[+\d][\d\s\-\(\)]{10,}$/;
+    return whatsappRegex.test(number);
+}
+
+// Form Submission - Emailga jo'natish
 async function handleOrderSubmit(e) {
     e.preventDefault();
     
@@ -381,10 +389,10 @@ async function handleOrderSubmit(e) {
     }
     
     // Get form values
-    const name = document.getElementById('name').value;
-    const whatsapp = document.getElementById('whatsapp').value;
-    const email = document.getElementById('email').value;
-    const details = document.getElementById('details').value;
+    const name = nameInput.value;
+    const whatsapp = whatsappInput.value;
+    const email = emailInput.value;
+    const details = detailsInput.value;
     const service = serviceInput.value;
     
     // Show loading, hide submit button
@@ -409,60 +417,49 @@ async function handleOrderSubmit(e) {
             })
         });
         
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `Server error: ${response.status}`);
-        }
-        
         const data = await response.json();
         
-        if (data.error) {
-            throw new Error(data.error);
+        if (!response.ok) {
+            throw new Error(data.error || `Server error: ${response.status}`);
         }
         
-        // LocalStorage ga ham saqlaymiz (backup sifatida)
-        saveOrderToLocalStorage(name, whatsapp, email, service, details);
-        
-        // Show success notification
-        showNotification('Order submitted successfully!', 'success');
-        
-        // Close order modal and show success modal
-        closeModals();
-        
-        // Set order time
-        const now = new Date();
-        if (orderTime) {
-            orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        if (data.success) {
+            // Show success notification
+            showNotification(translations[currentLang].successMessage, 'success');
+            
+            // Close order modal and show success modal
+            closeModals();
+            
+            // Set order time
+            const now = new Date();
+            if (orderTime) {
+                orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+            }
+            
+            // Show success modal
+            successModal.classList.add('active');
+            
+            // Reset form
+            orderForm.reset();
+            
+        } else {
+            throw new Error(data.error || 'Order submission failed');
         }
-        
-        // Show success modal
-        successModal.classList.add('active');
-        
-        // Reset form
-        orderForm.reset();
         
     } catch (error) {
         console.error('Error:', error);
         
-        // Agar backend ishlamasa, faqat localStorage ga saqlaymiz
-        saveOrderToLocalStorage(name, whatsapp, email, service, details);
+        // Agar server ishlamasa, WhatsApp ga yo'naltiramiz
+        const whatsappMessage = `Salom! Men ${service} xizmati uchun buyurtma bermoqchiman. Ismim: ${name}, Email: ${email}. Tafsilotlar: ${details}`;
+        const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(whatsappMessage)}`;
         
-        showNotification('Order saved locally. We will contact you soon!', 'warning');
+        showNotification('Server not responding. Please contact us directly on WhatsApp.', 'warning');
         
-        // Close order modal and show success modal
-        closeModals();
+        // 3 soniyadan so'ng WhatsApp ga yo'naltiramiz
+        setTimeout(() => {
+            window.open(whatsappUrl, '_blank');
+        }, 3000);
         
-        // Set order time
-        const now = new Date();
-        if (orderTime) {
-            orderTime.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-        }
-        
-        // Show success modal
-        successModal.classList.add('active');
-        
-        // Reset form
-        orderForm.reset();
     } finally {
         // Hide loading, show submit button
         if (formLoading && submitOrderBtn) {
@@ -472,64 +469,61 @@ async function handleOrderSubmit(e) {
     }
 }
 
-// LocalStorage ga buyurtma saqlash
-function saveOrderToLocalStorage(name, whatsapp, email, service, details) {
-    try {
-        // Get existing orders from localStorage
-        const existingOrders = JSON.parse(localStorage.getItem('orders')) || [];
-        
-        // Create new order
-        const newOrder = {
-            id: Date.now(),
-            name,
-            whatsapp,
-            email,
-            service,
-            details,
-            orderTime: new Date().toISOString(),
-            status: 'pending'
-        };
-        
-        // Add to orders array
-        existingOrders.push(newOrder);
-        
-        // Save to localStorage
-        localStorage.setItem('orders', JSON.stringify(existingOrders));
-        
-        console.log('Order saved to localStorage:', newOrder);
-        return true;
-    } catch (error) {
-        console.error('Error saving to localStorage:', error);
-        return false;
-    }
-}
-
 // Service demand tracking
 function trackServiceDemand(serviceName) {
     try {
         const demandData = JSON.parse(localStorage.getItem('serviceDemand')) || {};
         demandData[serviceName] = (demandData[serviceName] || 0) + 1;
         localStorage.setItem('serviceDemand', JSON.stringify(demandData));
-        
-        // Backendga ham yuborish (agar ulanish bo'lsa)
-        fetch('/api/service-demand', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                service: serviceName,
-                timestamp: new Date().toISOString()
-            })
-        }).catch(error => console.error('Failed to track service demand:', error));
     } catch (error) {
         console.error('Error tracking service demand:', error);
     }
 }
 
+// Real-time form validation
+function setupFormValidation() {
+    const formFields = orderForm.querySelectorAll('input, textarea');
+    
+    formFields.forEach(field => {
+        field.addEventListener('blur', () => {
+            validateForm();
+        });
+        
+        field.addEventListener('input', () => {
+            // Remove error state when user starts typing
+            const formGroup = field.closest('.form-group');
+            if (formGroup) {
+                formGroup.classList.remove('error');
+                const errorElement = formGroup.querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.remove();
+                }
+            }
+        });
+    });
+}
+
+// Initialize the application
+function init() {
+    // Initialize typing animation
+    type();
+    
+    // Initialize scroll animations
+    checkScroll();
+    window.addEventListener('scroll', checkScroll);
+    
+    // Setup form validation
+    if (orderForm) {
+        setupFormValidation();
+    }
+    
+    // Check if there are any orders in localStorage on page load
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    console.log('Orders in localStorage:', orders.length);
+}
+
 // Event Listeners
-window.addEventListener('scroll', checkScroll);
-window.addEventListener('load', checkScroll);
+window.addEventListener('load', init);
 
 if (hamburger) {
     hamburger.addEventListener('click', () => {
@@ -540,7 +534,9 @@ if (hamburger) {
 // Close mobile menu when clicking on links
 document.querySelectorAll('nav a').forEach(link => {
     link.addEventListener('click', () => {
-        navMenu.classList.remove('active');
+        if (navMenu) {
+            navMenu.classList.remove('active');
+        }
     });
 });
 
@@ -587,60 +583,13 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Real-time form validation
-if (orderForm) {
-    orderForm.querySelectorAll('input, textarea').forEach(input => {
-        input.addEventListener('blur', () => {
-            validateForm();
-        });
-        
-        input.addEventListener('input', () => {
-            // Remove error state when user starts typing
-            if (input.value.trim()) {
-                input.parentElement.classList.remove('error');
-            }
-        });
+// WhatsApp contact button
+const whatsappBtn = document.querySelector('.btn-whatsapp');
+if (whatsappBtn) {
+    whatsappBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const message = "Salom! Men xizmatlaringiz haqida ma'lumot olmoqchiman.";
+        window.open(`https://wa.me/1234567890?text=${encodeURIComponent(message)}`, '_blank');
     });
 }
-document.getElementById("order-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const product = document.getElementById("product").value.trim();
-
-  if (!name || !phone || !product) {
-    document.getElementById("message").textContent = "❌ Barcha maydonlarni to‘ldiring!";
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, phone, product })
-    });
-
-    if (response.ok) {
-      document.getElementById("message").textContent = "✅ Buyurtma yuborildi!";
-      document.getElementById("order-form").reset();
-    } else {
-      document.getElementById("message").textContent = "❌ Xatolik yuz berdi!";
-    }
-  } catch (error) {
-    console.error("Xatolik:", error);
-    document.getElementById("message").textContent = "❌ Server ishlamayapti!";
-  }
-});
-
-// Initialize
-type();
-checkScroll();
-
-// Check if there are any orders in localStorage on page load
-window.addEventListener('load', () => {
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    console.log('Orders in localStorage:', orders.length);
-});
 ```
-
